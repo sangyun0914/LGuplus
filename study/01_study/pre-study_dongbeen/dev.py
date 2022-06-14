@@ -28,21 +28,48 @@ while True:
     cam_blur_median = cv2.medianBlur(cam, 5)
     cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
 
+    #Canny
     edge = cv2.Canny(cam, 50, 200)
     edge2 = cv2.Canny(cam, 100, 200)
     edge = cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
     edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
 
+    #face detect
+    face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+    #face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt_tree.xml")
+
+    faces = face_cascade.detectMultiScale(cam2, 1.3, 5)
+
+    detectImage = cv2.resize(cam, (250, 150))
+    src = cv2.resize(cam, (250,150))
+
+    ratio = 0.05
+
+    for (x,y,w,h) in faces:
+        cv2.rectangle(detectImage, (x,y), (x+w, y+h), (255,0,0),2)
+        roi_gray = cam2[y:y+h, x:x+w]
+        roi_color = detectImage[y:y+h, x:x+w]
+
+        small = cv2.resize(src[y: y + h, x: x + w], None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST)
+        src[y: y + h, x: x + w] = cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
+
+
+    #detectImage = cv2.cvtColor(detectImage, cv2.COLOR_GRAY2BGR)
+
     numpy_horizontal1 = np.hstack((cam, cam3))
     numpy_horizontal2 = np.hstack((cam_blur, cam_blur_gaussian))
     numpy_horizontal3 = np.hstack((cam_blur_median, cam_blur_bilateral))
     numpy_horizontal4 = np.hstack((edge, edge2))
+    numpy_horizontal5 = np.hstack((detectImage, src))
 
     numpy_vertical = np.vstack((numpy_horizontal1, numpy_horizontal2))
 
     numpy_final = np.vstack((numpy_vertical, numpy_horizontal3))
 
     numpy_final = np.vstack((numpy_final, numpy_horizontal4))
+
+    numpy_final = np.vstack((numpy_final, numpy_horizontal5))
+
 
     if ret:
         #cv2.imshow('cam', cam)
