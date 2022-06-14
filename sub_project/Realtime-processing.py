@@ -5,6 +5,7 @@ import cvlib as cv
 from cvlib.object_detection import draw_bbox
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 cap = cv2.VideoCapture(0)       #webcam을 연결
 faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -13,13 +14,19 @@ if not cap.isOpened():      #webcam 연결 실패시
     raise IOError("Cannot open webcam")
     exit()
 
+prevTime = 0
+
 while cap.isOpened():    #webcam 연결 시 실행
+    curTime = time.time()
+
+    sec = curTime - prevTime
+    prevTime = curTime
 
     ret, frame = cap.read()     #프레임별 캡쳐
-    ret, frame1 = cap.read()
-    ret, frame2 =cap.read()
-    ret, frame3 =cap.read()
-    ret, frame4 =cap.read()
+    frame1 = frame
+    frame2 = frame
+    frame3 = frame
+    frame4 = frame
 
     edges=cv2.Canny(frame3,100,200)
     video = cv2.resize(frame, (0, 0), None, .5, .5)     #일반 웹캠
@@ -54,6 +61,17 @@ while cap.isOpened():    #webcam 연결 시 실행
     numpy_horizontal = np.hstack((video, video1))
     numpy_horizontal1 = np.hstack((video2, video3))
     numpy_vertical = np.vstack((numpy_horizontal, numpy_horizontal1))
+
+    fps = 1/(sec)
+
+    # 디버그 메시지로 확인해보기
+
+    # 프레임 수를 문자열에 저장
+    str = "FPS : %0.1f" % fps
+
+    # 표시
+    print(str)
+
     cv2.imshow('webcam', numpy_vertical)     
     #cv2.imshow('ss',edges)
     k = cv2.waitKey(1) & 0xFF
@@ -61,4 +79,4 @@ while cap.isOpened():    #webcam 연결 시 실행
         break
 
 cap.release()       #카메라 사용 종료
-cv2.destroyAllWindows()     #창 닫기
+cv2.destroyAllWindows()       #창 닫기
