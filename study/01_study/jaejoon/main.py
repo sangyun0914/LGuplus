@@ -58,10 +58,10 @@ while(True):
     _, filter3 = cv2.threshold(back2, 30, 1, cv2.THRESH_BINARY)
 
     # 영상 여러개 한번에 보여주기 위해 합치는 과정
-    numpy_horizontal = np.hstack((diff2, frame * filter2, back2, frame * filter3))
+    numpy_horizontal = np.hstack((frame * filter2, frame * filter3))
 
     # 합친 화면 띄워줌
-    cv2.imshow('background', numpy_horizontal)
+    #cv2.imshow('background', numpy_horizontal)
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 흑백으로 변환
 
@@ -91,10 +91,13 @@ while(True):
         roi = cv2.resize(roi, (w,h), interpolation=cv2.INTER_AREA)  
         mosaic[y:y+h, x:x+w] = roi # 원본 이미지에 적용
 
+    th = cv2.cvtColor(th, cv2.COLOR_GRAY2BGR)
+    th2 = cv2.cvtColor(th2, cv2.COLOR_GRAY2BGR)
+    canny = cv2.cvtColor(canny, cv2.COLOR_GRAY2BGR)
     result1 = np.hstack((th, th2, canny))
-    result2 = np.hstack((frame, gblur, mosaic))
-    cv2.imshow('1', result1)
-    cv2.imshow('2', result2)
+    result2 = np.hstack((gblur, bfblur, mosaic))
+    #cv2.imshow('threshold, canny edge', result1)
+    #cv2.imshow('blur, mosaic', result2)
 
     # YOLO
     blob = cv2.dnn.blobFromImage(frame, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
@@ -134,7 +137,14 @@ while(True):
             text = "{}: {:.4f}".format(classes[class_ids[i]], confidences[i])
             cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
-    cv2.imshow("YOLO", frame)
+
+    result3 = np.hstack((gblur, bfblur, mosaic))
+    result4 = np.hstack((frame * filter2, frame * filter3, frame))
+    result5 = np.vstack((result1, result3, result4))
+
+
+    #cv2.imshow("YOLO", frame)
+    cv2.imshow("pre-study", result5)
 
     # 키보드 입력시 종료
     if cv2.waitKey(33) > 0:
