@@ -12,7 +12,7 @@ class_name = []
 with open("classes.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
-net = cv2.dnn.readNet("yolov4.weights", "yolov4.cfg")
+net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
@@ -20,11 +20,46 @@ model = cv2.dnn_DetectionModel(net)
 model.setInputParams(size=(416,416), scale=1/255, swapRB=True)
 
 cap = cv2.VideoCapture(0)
+#전경 검출
+ret, back = cap.read()
+back = cv2.cvtColor(back, cv2.COLOR_BGR2GRAY)
+back = cv2.GaussianBlur(back, (0,0),1)
+back = cv2.resize(back, (250, 150))
+
+#배경 검출
+bs = cv2.createBackgroundSubtractorMOG2()
+bs.setDetectShadows(False)
+
 while True:
     ret, cam = cap.read()
     cam = cv2.resize(cam, (250, 150))
     #cam1 = cv2.resize(cam, (250, 250))
     cam2 = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
+
+    #전경 검출
+    cam4 = cv2.resize(cam, (250, 150))
+    gray = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (0,0),1)
+
+    diff = cv2.absdiff(gray, back)
+    _, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
+
+    cnt, _, stats, _ = cv2.connectedComponentsWithStats(diff)
+
+    for i in range(1, cnt):
+        x, y, w, h, s = stats[i]
+
+        if s < 100:
+            continue
+
+        cv2.rectangle(cam4, (x,y,w,h), (0,0,255),2)
+
+    diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
+
+    #배경 검출
+    fgmask = bs.apply(gray)
+    #back2 = bs.getBackgroundImage()
+    fgmask = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
 
     #threshold 처리
     #ret, cam2 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY) #THRESH_BINARY 적용
@@ -40,7 +75,7 @@ while True:
     cam3 = cv2.cvtColor(cam3, cv2.COLOR_GRAY2BGR)
 
     #blur 처리
-    cam_blur = cv2.blur(cam,(5,5))
+    #cam_blur = cv2.blur(cam,(5,5))
     cam_blur_gaussian = cv2.GaussianBlur(cam,(5,5),0)
     cam_blur_median = cv2.medianBlur(cam, 5)
     cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
@@ -89,18 +124,20 @@ while True:
     #detectImage = cv2.cvtColor(detectImage, cv2.COLOR_GRAY2BGR)
 
     numpy_horizontal1 = np.hstack((cam, cam3))
-    numpy_horizontal2 = np.hstack((cam_blur, cam_blur_gaussian))
+    numpy_horizontal2 = np.hstack((fgmask, cam_blur_gaussian))
+    numpy_horizontal12 = np.hstack((numpy_horizontal1, numpy_horizontal2))
+
     numpy_horizontal3 = np.hstack((cam_blur_median, cam_blur_bilateral))
     numpy_horizontal4 = np.hstack((edge, edge2))
+    numpy_horizontal34 = np.hstack((numpy_horizontal3, numpy_horizontal4))
+
     numpy_horizontal5 = np.hstack((detectImage, src))
+    numpy_horizontal6 = np.hstack((cam4, diff))
+    numpy_horizontal56 = np.hstack((numpy_horizontal5, numpy_horizontal6))
 
-    numpy_vertical = np.vstack((numpy_horizontal1, numpy_horizontal2))
+    numpy_vertical = np.vstack((numpy_horizontal12, numpy_horizontal34))
 
-    numpy_final = np.vstack((numpy_vertical, numpy_horizontal3))
-
-    numpy_final = np.vstack((numpy_final, numpy_horizontal4))
-
-    numpy_final = np.vstack((numpy_final, numpy_horizontal5))
+    numpy_final = np.vstack((numpy_vertical, numpy_horizontal56))
 
 
     if ret:
