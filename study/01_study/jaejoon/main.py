@@ -63,8 +63,6 @@ while(True):
     # 합친 화면 띄워줌
     cv2.imshow('background', numpy_horizontal)
 
-
-
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 흑백으로 변환
 
     # threshold    
@@ -98,6 +96,7 @@ while(True):
     cv2.imshow('1', result1)
     cv2.imshow('2', result2)
 
+    # YOLO
     blob = cv2.dnn.blobFromImage(frame, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
     net.setInput(blob)
     outs = net.forward(output_layers)
@@ -136,7 +135,6 @@ while(True):
             cv2.putText(frame, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
     cv2.imshow("YOLO", frame)
-
 
     # 키보드 입력시 종료
     if cv2.waitKey(33) > 0:
