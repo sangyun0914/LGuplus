@@ -12,7 +12,7 @@ class_name = []
 with open("classes.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
-net = cv2.dnn.readNet("yolov4.weights", "yolov4.cfg")
+net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
