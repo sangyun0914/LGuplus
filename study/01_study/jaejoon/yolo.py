@@ -7,7 +7,7 @@ capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
 # Load Yolo
-net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
 classes = []
 with open("coco.names", "r") as f:
     classes = [line.strip() for line in f.readlines()]

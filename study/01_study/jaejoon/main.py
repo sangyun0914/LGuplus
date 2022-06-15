@@ -21,7 +21,7 @@ back1 = cv2.cvtColor(back1, cv2.COLOR_BGR2GRAY)
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
 
 # Load Yolo
-net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
 classes = []
 with open("coco.names", "r") as f:
     classes = [line.strip() for line in f.readlines()]
