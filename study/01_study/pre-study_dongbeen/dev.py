@@ -26,6 +26,10 @@ back = cv2.cvtColor(back, cv2.COLOR_BGR2GRAY)
 back = cv2.GaussianBlur(back, (0,0),1)
 back = cv2.resize(back, (250, 150))
 
+#배경 검출
+bs = cv2.createBackgroundSubtractorMOG2()
+bs.setDetectShadows(False)
+
 while True:
     ret, cam = cap.read()
     cam = cv2.resize(cam, (250, 150))
@@ -52,6 +56,11 @@ while True:
 
     diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
 
+    #배경 검출
+    fgmask = bs.apply(gray)
+    #back2 = bs.getBackgroundImage()
+    fgmask = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
+
     #threshold 처리
     #ret, cam2 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY) #THRESH_BINARY 적용
 
@@ -66,7 +75,7 @@ while True:
     cam3 = cv2.cvtColor(cam3, cv2.COLOR_GRAY2BGR)
 
     #blur 처리
-    cam_blur = cv2.blur(cam,(5,5))
+    #cam_blur = cv2.blur(cam,(5,5))
     cam_blur_gaussian = cv2.GaussianBlur(cam,(5,5),0)
     cam_blur_median = cv2.medianBlur(cam, 5)
     cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
@@ -115,7 +124,7 @@ while True:
     #detectImage = cv2.cvtColor(detectImage, cv2.COLOR_GRAY2BGR)
 
     numpy_horizontal1 = np.hstack((cam, cam3))
-    numpy_horizontal2 = np.hstack((cam_blur, cam_blur_gaussian))
+    numpy_horizontal2 = np.hstack((fgmask, cam_blur_gaussian))
     numpy_horizontal12 = np.hstack((numpy_horizontal1, numpy_horizontal2))
 
     numpy_horizontal3 = np.hstack((cam_blur_median, cam_blur_bilateral))
