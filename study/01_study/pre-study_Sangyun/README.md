@@ -1,6 +1,6 @@
 # Created environment for running yolov4 with tensorflow
-# Enables GPU acceleration for silicon Apple chip
-# Modify conda-gpu.yml for other GPU model usage
+Enables GPU acceleration for silicon Apple chip
+Modify conda-gpu.yml for other GPU model usage
 
 # Creating environment
 conda env create -f conda-gpu.yml
@@ -21,4 +21,4 @@ python detect_video.py --weights ./checkpoints/yolov4-416 --size 416 --model yol
 
 
 # Result: Does not perform as well in terms of FPS 
-# Average 7.0 FPS in M1 Pro Metal
+Average 7.0 FPS in M1 Pro Metal
