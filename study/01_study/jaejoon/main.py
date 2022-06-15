@@ -20,7 +20,7 @@ back1 = cv2.cvtColor(back1, cv2.COLOR_BGR2GRAY)
 # 배경 추출 알고리즘 함수, 오랜 시간 동안 변하지 않는 픽셀들을 배경으로 판단하는 방식
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
 
-# Load Yolo
+# YOLO 설정
 net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
 classes = []
 with open("coco.names", "r") as f:
@@ -28,7 +28,7 @@ with open("coco.names", "r") as f:
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 np.random.seed(42)
-colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8')
+colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8') # 클래스 별 랜덤 색상 정해줌
 
 while(True):
     ret, frame1 = capture.read()
@@ -56,11 +56,7 @@ while(True):
     # 원본 영상에서 전경 추출을 위해 필터 생성
     _, filter3 = cv2.threshold(back2, 30, 1, cv2.THRESH_BINARY)
 
-    # 영상 여러개 한번에 보여주기 위해 합치는 과정
-    numpy_horizontal = np.hstack((frame1 * filter2, frame1 * filter3))
-
-    # 합친 화면 띄워줌
-    #cv2.imshow('background', numpy_horizontal)
+    ###################################################################################
 
     ret, frame2 = capture.read()
 
@@ -95,10 +91,8 @@ while(True):
     th = cv2.cvtColor(th, cv2.COLOR_GRAY2BGR)
     th2 = cv2.cvtColor(th2, cv2.COLOR_GRAY2BGR)
     canny = cv2.cvtColor(canny, cv2.COLOR_GRAY2BGR)
-    result1 = np.hstack((th, th2, canny))
-    result2 = np.hstack((gblur, bfblur, mosaic))
-    #cv2.imshow('threshold, canny edge', result1)
-    #cv2.imshow('blur, mosaic', result2)
+    
+    ###################################################################################
 
     ret, frame3 = capture.read()
     height, width, channels = frame3.shape
@@ -108,7 +102,6 @@ while(True):
     net.setInput(blob)
     outs = net.forward(output_layers)
 
-    # Showing informations on the screen
     class_ids = []
     confidences = []
     boxes = []
@@ -117,21 +110,21 @@ while(True):
             scores = detection[5:]
             class_id = np.argmax(scores)
             confidence = scores[class_id]
-            if confidence > 0.5:
-                # Object detected
+            if confidence > 0.5: # 0.5보다 높으면 인식
                 center_x = int(detection[0] * width)
                 center_y = int(detection[1] * height)
                 w = int(detection[2] * width)
                 h = int(detection[3] * height)
-                # Rectangle coordinates
                 x = int(center_x - w / 2)
                 y = int(center_y - h / 2)
                 boxes.append([x, y, w, h])
                 confidences.append(float(confidence))
                 class_ids.append(class_id)
 
+    # 중복 박스 제거
     indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
 
+    # 물체 주변 박스, confidence 그려줌
     if len(indices) > 0:
         for i in indices.flatten():
             (x, y) = (boxes[i][0], boxes[i][1])
@@ -142,12 +135,14 @@ while(True):
             cv2.putText(frame3, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
 
+    # 영상 여러개 한번에 보여주기 위해 합치는 과정
+    result0 = np.hstack((frame1 * filter2, frame1 * filter3))
+    result1 = np.hstack((th, th2, canny))
+    result2 = np.hstack((gblur, bfblur, mosaic))
     result3 = np.hstack((gblur, bfblur, mosaic))
     result4 = np.hstack((frame1 * filter2, frame1 * filter3, frame3))
     result5 = np.vstack((result1, result3, result4))
 
-
-    #cv2.imshow("YOLO", frame)
     cv2.imshow("pre-study", result5)
 
     # 키보드 입력시 종료
