@@ -16,8 +16,9 @@ def justcam():
             
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('webcam', frame)
+                cv2.moveWindow('webcam', 0 , -100)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -52,8 +53,9 @@ def faceblur():
                     # 원래 크기로 확대
                     roi = cv2.resize(roi, (w,h), interpolation=cv2.INTER_AREA)  
                     frame[y:y+h, x:x+w] = roi   # 원본 이미지에 적용
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('face blur', frame)
+                cv2.moveWindow('face blur', 420 , -100)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -68,12 +70,15 @@ def yolo():
         # Ensure camera is connected
         if capture.isOpened():
             (status, frame) = capture.read()
-            bbox, label, conf = cv.detect_common_objects(frame,confidence=0.5, nms_thresh=0.3, model='yolov3', enable_gpu=False)
+            # bbox, label, conf = cv.detect_common_objects(frame,confidence=0.1, nms_thresh=0.3, model='yolov3-tiny', enable_gpu=False)
+            # out = draw_bbox(frame, bbox, label, conf, write_conf=True)
+            bbox, label, conf = cv.detect_common_objects(frame)
             out = draw_bbox(frame, bbox, label, conf, write_conf=True)
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('yolo', frame)
+                cv2.moveWindow('yolo', 840 , -100)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -93,9 +98,10 @@ def edge():
             frame=cv2.Canny(frame,50,100)
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 frame=cv2.cvtColor(frame,cv2.COLOR_GRAY2BGR)
                 cv2.imshow('canny edge', frame)
+                cv2.moveWindow('canny edge', 0 , 220)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -112,8 +118,9 @@ def blur():
             frame = cv2.blur(frame,(5,5))
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('blur', frame)
+                cv2.moveWindow('blur', 420 , 220)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -132,9 +139,10 @@ def back():
             (status, frame) = capture.read()
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 fgmask = fgbg.apply(frame)
                 cv2.imshow('background', fgmask)
+                cv2.moveWindow('background', 840 , 220)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -156,8 +164,9 @@ def threhold():
             cv2.THRESH_BINARY,11,2)
             # Ensure valid frame
             if status:
-                frame=cv2.resize(frame, (0, 0), None, .5, .5)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('threhold', frame)
+                cv2.moveWindow('threhold', 0 , 500)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
