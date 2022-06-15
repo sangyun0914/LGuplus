@@ -1,0 +1,17 @@
+name: yolo
+
+dependencies:
+  - python=3.8
+  - pip
+  - matplotlib
+  - opencv
+  - apple::tensorflow-deps==2.5.0
+  - pip:
+    - tensorflow-macos==2.5.0
+    - tensorflow-metal==0.1.2
+    - opencv-python==4.1.1.26
+    - lxml
+    - tqdm
+    - absl-py
+    - easydict
+    - pillow
