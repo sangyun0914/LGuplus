@@ -1,5 +1,6 @@
 import multiprocessing as mp
 from multiprocessing import Lock
+from statistics import median
 import cv2
 import cvlib as cv
 from cvlib.object_detection import draw_bbox
@@ -28,6 +29,7 @@ def showMultiImage(dst, src, h, w, d, col, row):
     dst[(col*h):(col*h)+h, (row*w):(row*w)+w, 1] = src[0:h, 0:w]
     dst[(col*h):(col*h)+h, (row*w):(row*w)+w, 2] = src[0:h, 0:w]
 
+# ---------------------------------------------------------------------------------------------------------
 # [frame처리 함수 : canny]
 def frame_process_canny(frame):
   frame_processed = cv2.Canny(frame,100,200)
@@ -45,13 +47,15 @@ def frame_process_faceblur(frame,faceCascade):
 		minSize=(30, 30)
 	)
 
-  for (x, y, w, h) in faces:
+  for (x, y, w, h) in faces: # x : start position of x | y : start position of y | w : width | h : height
     rate=10
-    # cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    target = frame[y:y+h, x:x+w]   # 관심영역 지정
+    target = frame[y:y+h, x:x+w] # 감지된 얼굴 추출
+
     target = cv2.resize(target, (w//rate, h//rate)) # 1/rate 비율로 축소
     target = cv2.resize(target, (w,h), interpolation=cv2.INTER_AREA)  
-    frame[y:y+h, x:x+w] = target   # 원본 이미지에 적용
+    target = cv2.GaussianBlur(target , (7,7) , 0)
+
+    frame[y:y+h, x:x+w] = target # 모자이크 적용
 
   return frame
 
@@ -62,25 +66,28 @@ def frame_process_yolo(frame):
 
 # [frame처리 함수 : background 전경]
 def frame_process_background_front(frame):
-  hh, ww = frame.shape[:2]
+  # hh, ww = frame.shape[:2]
 
-# threshold on white
-# Define lower and uppper limits
-  lower = np.array([200, 200, 200])
+  # [threshold 적용]
+  # 하한값과 상한값 정하기
+  lower = np.array([180,180,180])
   upper = np.array([255, 255, 255])
 
-# Create mask to only select black
+  # frame에 상한값 하한 값 적용
   thresh = cv2.inRange(frame, lower, upper)
 
-# apply morphology
+  # [morphology 적용]
+  # 타원형 형태로 20x20 kernel array 생성
   kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20,20))
-  morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-# invert morp image
-  mask = 255 - morph
+  # thresh에 kernel 적용
+  morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel) # thresh의 노이즈 제거
 
-# apply mask to image
-  result = cv2.bitwise_and(frame, frame, mask=mask)
+  # [morphology 적용된 이미지 뒤집기]
+  mask = 255 - morph # 흑백 전환
+
+  # [frame에 mask 적용]
+  result = cv2.bitwise_and(frame, frame, mask=mask) # frame & frame
 
   return result
 
@@ -88,68 +95,113 @@ def frame_process_background_rear(frame):
   pass
 
 # [frame처리 함수 : blur]
+'''
+[이미지 블러처리] : 이미지에 커널(마스크)를 컨볼루션하여 블러닝효과를 줌 (활용하면 샤프닝효과도 가능)
+- 1. Averaging blurring : 커널의 가중치가 모두 동일
+- cv2.blur(src, (x,x))
+- src : blur 처리할 frame
+- (x,x) : 커널 사이즈
+
+- 2. Gaussian Blurring : 커널의 가중치가 중심으로 갈수록 커짐
+- cv2.GaussianBlur(src, (x,x), sigma)
+- src : blur 처리할 frame
+- (x,x) : 커널 사이즈
+- sigma : 시그마 값을 얼마나 넣을 것인지
+
+- 3. Median Blurring : 지정한 커널 크기 내의 픽셀을 크기순으로 정렬한 후 중간값을 뽑아서 픽셀값으로 사용
+- cv2.medianBlur(src, x)
+- src : blur 처리할 frame
+- x : 커널 사이즈 (x,x)
+
+'''
 def frame_process_blur(frame):
   grayframe = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   grayframe = cv2.equalizeHist(grayframe)
 
-  # median blur
+  # median blur 적용
   blur = cv2.medianBlur(grayframe,5)
 
   return blur
 
 # [frame처리 함수 : threshold]
+'''
+[이미지 임계처리] : 이미지 이진화의 방법인 simple thresholding 이용
+- cv2.threshold(src, thresh, maxval, type) → retval, dst
+- src : input image로 single channel(gray-scale) image를 넣어줌
+- thresh : 임계값
+- maxval : 임계값을 넘었을 때 적용할 값
+- type : thresholding type
+-      cv2.THRESH_BINARY
+-      cv2.THRESH_BINARY_INV
+-      cv2.THRESH_TRUNC
+-      cv2.THRESH_TOZERO
+-      cv2.THRESH_TOZERO_INV
+- 문제점 : 임계값을 이미지 전체에 적용하여 처리하기 때문에 하나의 이미지에 음영이 다르면 일부 영역이 모두 흰색 또는 검정색으로 보여지게 됨
+
+- cv2.adaptiveThreshold(src, maxValue, adaptiveMethod, thresholdType, blockSize, C)
+- src : grayscale image
+- maxValue : 임계값
+- adaptiveMethod : thresholding value를 결정하는 계산 방법
+- thresholdType : threshold type
+- blockSize : thresholding을 적용할 영역 사이즈
+- C : 평균이나 가중평균에서 차감할 값
+- blockSize나 C는 어떻게 결정?
+'''
 def frame_process_threshold(frame):
+  # gray로 바꾸기
   grayframe = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+  # gray로 바뀐 이미지 평준화
   grayframe = cv2.equalizeHist(grayframe)
 
-  # median blur
-  blur = cv2.medianBlur(grayframe,5)
+  # threshold를 적용하기 전 medianblur 적용 (무작위 노이즈를 제거하는데 효과적)
+  median_blur = cv2.medianBlur(grayframe, 9)
 
-  # apply threshold
-  ret, th1 = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY)
+  # threshold 적용
+  thresholdFrame = cv2.adaptiveThreshold(median_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,15,2)
 
-  return th1
-  
+  return thresholdFrame
+
+# ---------------------------------------------------------------------------------------------------------
 # [thread executing function : yolo]
 def yolo():
   capture = cv2.VideoCapture(0)
 
   while True:
-    if capture.isOpened():
-      status, frame = capture.read()
-      bbox, label, conf = cv.detect_common_objects(frame,confidence=0.5, nms_thresh=0.3, model='yolov3', enable_gpu=False)
-      out = draw_bbox(frame, bbox, label, conf, write_conf=True)
+    status, frame = capture.read()
 
-      # 이미지 높이
-      height = frame.shape[0]
-      # 이미지 넓이
-      width = frame.shape[1]
-      # 이미지 색상 크기
-      depth = frame.shape[2]
-      
-      if status:
-        cv2.imshow('yolo', frame)
+    bbox, label, conf = cv.detect_common_objects(frame,confidence=0.5, nms_thresh=0.3, model='yolov3', enable_gpu=False)
+    out = draw_bbox(frame, bbox, label, conf, write_conf=True)
 
-      else:
-        break
+    frame = cv2.resize(frame, None, fx=0.5, fy=0.5) #0.5배
 
-      if cv2.waitKey(1) == ord('q'):
-        break
+    cv2.imshow('yolo-object detection', frame)
+
+    if cv2.waitKey(1) == ord('q'):
+      break
 
   capture.release()
   cv2.destroyAllWindows()
 
 # [thread executing function : main] ------------------------------------------------------------------------------------------
 def main():
-  # --------------------------------------------------------------------------------------------------------
   # [카메라 가져오기]
   cap = cv2.VideoCapture(0)
-  faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
+  # [face detection을 위한 모델 가져오기]
+  faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")
+
+  # 글자를 넣기 위한 변수 설정
+  SCALE = 1
+  COLOR_WHITE = (255,255,255)
+  COLOR_RED = (0,0,255)
+  COLOR_BLACK = (0,0,0) 
+  THICKNESS = 2
+
+  # 카메라 안 열리면 exit
   if not cap.isOpened():
     exit()
 
-  # --------------------------------------------------------------------------------------------------------
   # [열린 카메라로 프레임 처리 시작]
   while cap.isOpened():
 
@@ -157,16 +209,14 @@ def main():
     ret, frame_original = cap.read()
     width, height , channel = frame_original.shape # original frame의 width, height, channel 정보를 받아옴
 
-    frame_original = cv2.resize(frame_original, (0, 0), None, .25, .25)
-    frame_gray = cv2.cvtColor(frame_original, cv2.COLOR_RGB2GRAY)
+    frame_original = cv2.resize(frame_original, (0, 0), None, .25, .25) # 본래 프레임에 0.25배 적용 -> 화면 분할로 들어갈 것이기 때문
 
     frame_faceblur = frame_original.copy() #blur frame 처리
-    frame_yolo = frame_original.copy() #yolo frame 처리
     frame_canny = frame_original.copy() #canny frame 처리
-    frame_background_front= frame_original.copy() #background frame 처리
-    frame_background_rear = frame_original.copy()
-    frame_blur = frame_original.copy()
-    frame_threshold = frame_original.copy()
+    frame_background_front= frame_original.copy() #background_front frame 처리
+    frame_background_rear = frame_original.copy() #background_rear frame 처리
+    frame_blur = frame_original.copy() #blur 처리
+    frame_threshold = frame_original.copy() # threshold 처리
     empty = np.zeros((width,height,channel), np.uint8) # original frame에서 받아온 shape 정보로 empty view 만들기 (검은화면)
 
     # process frame
@@ -184,29 +234,38 @@ def main():
     depth = frame_original.shape[2]
 
     # 화면에 표시할 이미지 만들기 ( 2 x 2 )
-    dstimage = create_image_multiple(height, width, depth, 4, 2)
+    view = create_image_multiple(height, width, depth, 4, 2)
 
     # 원하는 위치에 화면 넣기
-    showMultiImage(dstimage, frame_background_front, height,width,depth,0,0)
-    showMultiImage(dstimage, frame_background_rear, height,width,depth,0,1)
-    showMultiImage(dstimage, frame_faceblur, height, width, depth, 1, 0)
-    showMultiImage(dstimage, frame_canny, height, width, 1, 1, 1)
-    showMultiImage(dstimage, frame_original, height, width, depth, 2, 0)
-    showMultiImage(dstimage, empty, height, width, depth, 2, 1)
-    showMultiImage(dstimage, frame_threshold, height, width, 1, 3, 0)
-    showMultiImage(dstimage, frame_blur, height, width, 1, 3, 1)
+    showMultiImage(view, frame_background_front, height,width,depth,0,0)
+    showMultiImage(view, frame_background_rear, height,width,depth,0,1)
+    showMultiImage(view, frame_faceblur, height, width, depth, 1, 0)
+    showMultiImage(view, frame_canny, height, width, 1, 1, 1)
+    showMultiImage(view, frame_original, height, width, depth, 2, 0)
+    showMultiImage(view, empty, height, width, depth, 2, 1)
+    showMultiImage(view, frame_threshold, height, width, 1, 3, 0)
+    showMultiImage(view, frame_blur, height, width, 1, 3, 1)
+
+    # 글자 넣기
+    cv2.putText(view, "background-front", (20,50), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_BLACK, THICKNESS)
+    cv2.putText(view, "background-back", (500,50), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_BLACK, THICKNESS)
+    cv2.putText(view, "faceblur", (20,300), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_BLACK, THICKNESS)
+    cv2.putText(view, "canny", (500,300), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_RED, THICKNESS)
+    cv2.putText(view, "original", (20,575), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_BLACK, THICKNESS)
+    cv2.putText(view, "threshold", (20,850), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_RED, THICKNESS)
+    cv2.putText(view, "blur", (500,850), cv2.FONT_HERSHEY_SIMPLEX, SCALE, COLOR_RED, THICKNESS)
 
     # 화면 표시
-    cv2.imshow('Realtime-processing',dstimage)
+    cv2.imshow('Realtime-image-processing',view)
 
     if cv2.waitKey(1) == ord('q'):
       break
-  # --------------------------------------------------------------------------------------------------------
+
   # [resource release]
   cap.release()
   cv2.destroyAllWindows()
 
-#---------------------------------------
+#--------------------------------------------------------------------
 # [start]
 if __name__ == "__main__":
   threadMain = mp.Process(target=main, args=())
@@ -214,4 +273,4 @@ if __name__ == "__main__":
 
   threadMain.start()
   threadYolo.start()
-#---------------------------------------
+#--------------------------------------------------------------------
