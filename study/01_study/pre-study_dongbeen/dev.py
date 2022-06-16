@@ -13,6 +13,7 @@ with open("classes.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
 net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg")
+#net = cv2.dnn.readNet("yolov4-tiny.weights", "yolov4-tiny.cfg")
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
@@ -58,8 +59,9 @@ while True:
 
     #배경 검출
     fgmask = bs.apply(gray)
-    #back2 = bs.getBackgroundImage()
+    back2 = bs.getBackgroundImage()
     fgmask = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
+    back2 = cv2.cvtColor(back2, cv2.COLOR_GRAY2BGR)
 
     #threshold 처리
     #ret, cam2 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY) #THRESH_BINARY 적용
@@ -77,14 +79,14 @@ while True:
     #blur 처리
     #cam_blur = cv2.blur(cam,(5,5))
     cam_blur_gaussian = cv2.GaussianBlur(cam,(5,5),0)
-    cam_blur_median = cv2.medianBlur(cam, 5)
-    cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
+    #cam_blur_median = cv2.medianBlur(cam, 5)
+    #cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
 
     #Canny
-    edge = cv2.Canny(cam, 50, 200)
-    edge2 = cv2.Canny(cam, 100, 200)
+    edge = cv2.Canny(cam, 50, 150)
+    #edge2 = cv2.Canny(cam, 100, 200)
     edge = cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
-    edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
+    #edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
 
     #face detect
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -124,20 +126,18 @@ while True:
     #detectImage = cv2.cvtColor(detectImage, cv2.COLOR_GRAY2BGR)
 
     numpy_horizontal1 = np.hstack((cam, cam3))
-    numpy_horizontal2 = np.hstack((fgmask, cam_blur_gaussian))
+    numpy_horizontal2 = np.hstack((fgmask, back2))
     numpy_horizontal12 = np.hstack((numpy_horizontal1, numpy_horizontal2))
-
-    numpy_horizontal3 = np.hstack((cam_blur_median, cam_blur_bilateral))
-    numpy_horizontal4 = np.hstack((edge, edge2))
-    numpy_horizontal34 = np.hstack((numpy_horizontal3, numpy_horizontal4))
+    numpy_horizontal12 = np.hstack((numpy_horizontal12, cam_blur_gaussian))
 
     numpy_horizontal5 = np.hstack((detectImage, src))
     numpy_horizontal6 = np.hstack((cam4, diff))
     numpy_horizontal56 = np.hstack((numpy_horizontal5, numpy_horizontal6))
+    numpy_horizontal56 = np.hstack((numpy_horizontal56, edge))
 
-    numpy_vertical = np.vstack((numpy_horizontal12, numpy_horizontal34))
+    numpy_final = np.vstack((numpy_horizontal12, numpy_horizontal56))
 
-    numpy_final = np.vstack((numpy_vertical, numpy_horizontal56))
+    #numpy_final = np.vstack((numpy_vertical, numpy_horizontal56))
 
 
     if ret:
