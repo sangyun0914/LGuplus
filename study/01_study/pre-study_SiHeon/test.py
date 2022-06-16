@@ -4,7 +4,7 @@ import cvlib as cv
 from cvlib.object_detection import draw_bbox
 import time
 
-
+#웹캠만 출력
 def justcam():
     capture = cv2.VideoCapture(0) 
     
@@ -27,6 +27,7 @@ def justcam():
     capture.release()
     cv2.destroyAllWindows()
 
+#얼굴 감지 후, 블러처리
 def faceblur():
     capture = cv2.VideoCapture(0) 
     faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -64,6 +65,7 @@ def faceblur():
     capture.release()
     cv2.destroyAllWindows()
 
+#yolo를 사용한 물체 인식
 def yolo():
     capture = cv2.VideoCapture(0) 
     while True:
@@ -87,6 +89,7 @@ def yolo():
     capture.release()
     cv2.destroyAllWindows()
 
+#canny edge 감지
 def edge():
     capture = cv2.VideoCapture(0) 
 
@@ -99,7 +102,7 @@ def edge():
             # Ensure valid frame
             if status:
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
-                frame=cv2.cvtColor(frame,cv2.COLOR_GRAY2BGR)
+                #frame=cv2.cvtColor(frame,cv2.COLOR_GRAY2BGR)
                 cv2.imshow('canny edge', frame)
                 cv2.moveWindow('canny edge', 0 , 220)
             else:
@@ -107,6 +110,7 @@ def edge():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
+#블러처리
 def blur():
     capture = cv2.VideoCapture(0) 
 
@@ -129,6 +133,31 @@ def blur():
     capture.release()
     cv2.destroyAllWindows()
 
+#배경 감지
+def backsub():
+    capture = cv2.VideoCapture(0) 
+    fgbg = cv2.createBackgroundSubtractorMOG2()
+    while True:
+
+        # Ensure camera is connected
+        if capture.isOpened():
+            (status, frame) = capture.read()
+            # Ensure valid frame
+            if status:
+                frame=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                frame=cv2.resize(frame, (0, 0), None, .33, .33)
+                fgmask = fgbg.apply(frame)
+                cv2.imshow('backgroundsub', fgmask)
+                cv2.moveWindow('backgroundsub', 840 , 220)
+            else:
+                break
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+    capture.release()
+    cv2.destroyAllWindows()
+
+#배경만
 def back():
     capture = cv2.VideoCapture(0) 
     fgbg = cv2.createBackgroundSubtractorMOG2()
@@ -141,8 +170,9 @@ def back():
             if status:
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 fgmask = fgbg.apply(frame)
-                cv2.imshow('background', fgmask)
-                cv2.moveWindow('background', 840 , 220)
+                back=fgbg.getBackgroundImage()
+                cv2.imshow('background', back)
+                cv2.moveWindow('background', 420 , 500)
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -151,6 +181,7 @@ def back():
     capture.release()
     cv2.destroyAllWindows()
 
+#threhold 적용
 def threhold():
     capture = cv2.VideoCapture(0) 
     while True:
@@ -176,13 +207,15 @@ def threhold():
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
+    #멀티 프로세싱
     th1 = mp.Process(target=justcam, args=())
     th2 = mp.Process(target=faceblur, args=())
     th3 = mp.Process(target=yolo, args=())
     th4 = mp.Process(target=edge, args=())
     th5 = mp.Process(target=blur, args=())
-    th6 = mp.Process(target=back, args=())
+    th6 = mp.Process(target=backsub, args=())
     th7 = mp.Process(target=threhold, args=())
+    th8 = mp.Process(target=back, args=())
 
     th1.start()
     th2.start()
@@ -191,5 +224,6 @@ if __name__ == '__main__':
     th5.start()
     th6.start()
     th7.start()
+    th8.start()
     
     
