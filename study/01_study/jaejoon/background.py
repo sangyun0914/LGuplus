@@ -6,14 +6,14 @@ capture = cv2.VideoCapture(0)
 capture.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-# 1. 처음에 웹캠을 키고 배경 영상을 찍음 
+# 1. 처음에 웹캠을 키고 배경 영상을 찍음
 # 새로운 프레임이 들어오면 그 프레임에 배경영상을 빼서 차이가 일정 수준이 넘어가면 전경이라고 인식
-# 2. 자체 내장 함수 사용 
+# 2. 자체 내장 함수 사용
 # 픽셀 값이 일정 시간 동안 변화가 없으면 배경이라고 인식
 
 # 배경 영상 등록
 ret, back1 = capture.read()
-    
+
 # 연산 속도를 높이기 위해 그레이스케일 영상으로 변환
 back1 = cv2.cvtColor(back1, cv2.COLOR_BGR2GRAY)
 
@@ -25,7 +25,7 @@ while(True):
 
     # 현재 프레임 영상 그레이스케일 변환
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    
+
     # 배경 영상과 현재 프레임의 차이 절댓값 구함
     diff = cv2.absdiff(gray, back1)
 
@@ -59,4 +59,3 @@ while(True):
 # 웹캠 종료, 모든 창 종료
 capture.release()
 cv2.destroyAllWindows()
- 
