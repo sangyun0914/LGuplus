@@ -28,7 +28,7 @@ imgsz=(640, 640),  # inference size (height, width)
 conf_thres=0.25,  # confidence threshold
 iou_thres=0.45,  # NMS IOU threshold
 max_det=1000,  # maximum detections per image
-device= "type='cpu'",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+device=torch.device('cpu'),  # cuda device, i.e. 0 or 0,1,2,3 or cpu
 view_img=False,  # show results
 save_txt=False,  # save results to *.txt
 save_conf=False,  # save confidences in --save-txt labels
@@ -51,6 +51,7 @@ dnn=False,  # use OpenCV DNN for ONNX inference
 source = '0'
 webcam = source.isnumeric()
 
+
 # Load model
 model = DetectMultiBackend(weights = 'study/01_study/pre-study_Sangyun/yolov5/yolov5s.mlmodel', device=torch.device('cpu'), dnn=False, data=None, fp16=False)
 stride, names, pt = model.stride, model.names, model.pt
@@ -68,7 +69,7 @@ model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
 dt, seen = [0.0, 0.0, 0.0], 0
 for path, im, im0s, vid_cap, s in dataset:
         t1 = time_sync()
-        im = torch.from_numpy(im).to(device)
+        im = torch.from_numpy(im).to(torch.device('cpu'))
         im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
         im /= 255  # 0 - 255 to 0.0 - 1.0
         if len(im.shape) == 3:
@@ -77,13 +78,12 @@ for path, im, im0s, vid_cap, s in dataset:
         dt[0] += t2 - t1
 
         # Inference
-        visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False
         pred = model(im, augment=augment, visualize=visualize)
         t3 = time_sync()
         dt[1] += t3 - t2
 
         # NMS
-        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+        pred = non_max_suppression(pred, conf_thres = float(str(0.25)), iou_thres = 0.45, classes = None, agnostic = False, max_det=300)
         dt[2] += time_sync() - t3
 
         # Second-stage classifier (optional)
@@ -99,8 +99,6 @@ for path, im, im0s, vid_cap, s in dataset:
                 p, im0, frame = path, im0s.copy(), getattr(dataset, 'frame', 0)
 
             p = Path(p)  # to Path
-            save_path = str(save_dir / p.name)  # im.jpg
-            txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # im.txt
             s += '%gx%g ' % im.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
