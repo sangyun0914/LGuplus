@@ -31,6 +31,28 @@ def showMultiImage(dst, src, h, w, d, col, row):
 
 # ---------------------------------------------------------------------------------------------------------
 # [frame처리 함수 : canny]
+'''
+[Canny 함수의 세부과정]
+1. Noise reduction using Gaussian filter 
+- 노이즈 제거 이유 : 노이즈에서 화소의 갑작스런 강도 변화를 edge라고 잘못 판달할 수 있기 때문
+
+2. Gradient calculation along the horizontal and vertical axis 
+- Sobel mask의 수학적 정의에 따라 x, y방향의 gradient를 종합한 Edge Gradient이미지를 생성 -> edge 추출
+
+3. Non-Maximum Suppression (NMS) of false edges 
+- 화소 강도 차이가 큰 edge를 제외하고는 모두 억제하는 것
+- NMS는 욜로의 bounding box의 suppression 용도로도 사용됨 (yolo)
+
+4. Double thresholding for segregating strong and weak edges 
+- double thresholding이라는 이름답게 2개의 임계값을 가짐
+- (ex) th1 = 40 | th2 = 150 이라고 했을 때
+- 화소가 150이상인 것은 강한강도의 edge이기 때문에 살림
+- 화소가 40과 150 사이의 값이면 th2이상의 화소와 연결됐을 경우 살리지만, 혼자 동떨어진 값이면 버림
+- 화소가 40이하인 것은 약한강도의 edge로 판단하고 버림
+
+5. Edge tracking by hysteresis
+- (4)에서 thresholding 했던 대로 edge 트랙킹
+'''
 def frame_process_canny(frame):
   frame_processed = cv2.Canny(frame,100,200)
 
@@ -38,8 +60,10 @@ def frame_process_canny(frame):
 
 # [frame처리 함수 : blur]
 def frame_process_faceblur(frame,faceCascade):
+  # frame gray scale로 변환
   gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+  # face detect
   faces = faceCascade.detectMultiScale(
 		gray,
 		scaleFactor=1.1,
@@ -47,22 +71,19 @@ def frame_process_faceblur(frame,faceCascade):
 		minSize=(30, 30)
 	)
 
+  # detect된 face에 모자이크 처리
   for (x, y, w, h) in faces: # x : start position of x | y : start position of y | w : width | h : height
     rate=10
-    target = frame[y:y+h, x:x+w] # 감지된 얼굴 추출
+    mosaic = frame[y:y+h, x:x+w] # 감지된 얼굴 추출
 
-    target = cv2.resize(target, (w//rate, h//rate)) # 1/rate 비율로 축소
-    target = cv2.resize(target, (w,h), interpolation=cv2.INTER_AREA)  
-    target = cv2.GaussianBlur(target , (7,7) , 0)
+    mosaic = cv2.resize(mosaic, (w//rate, h//rate)) # 1/rate 비율로 축소 -> 모자이크가 더 효과적으로 적용되기 위해
+    mosaic = cv2.resize(mosaic, (w,h), interpolation=cv2.INTER_AREA)
+    
+    mosaic = cv2.GaussianBlur(mosaic , (7,7) , 0) #resize된 mosiac에 blur 처리를 줘서 좀 더 모자이크 효과를 줌
 
-    frame[y:y+h, x:x+w] = target # 모자이크 적용
+    frame[y:y+h, x:x+w] = mosaic # 실제 프레임에 모자이크 적용
 
   return frame
-
-# [frame처리 함수 : yolo]
-def frame_process_yolo(frame):
-  bbox, label, conf = cv.detect_common_objects(frame,confidence=0.5, nms_thresh=0.3, model='yolov3-tiny', enable_gpu=False)
-  out = draw_bbox(frame, bbox, label, conf, write_conf=True)
 
 # [frame처리 함수 : background 전경]
 def frame_process_background_front(frame):
@@ -92,7 +113,11 @@ def frame_process_background_front(frame):
   return result
 
 def frame_process_background_rear(frame):
-  pass
+  fgbg = cv2.createBackgroundSubtractorMOG()
+
+  fgmask = fgbg.apply(frame)
+
+  return fgmask
 
 # [frame처리 함수 : blur]
 '''
