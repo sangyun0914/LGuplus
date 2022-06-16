@@ -26,14 +26,16 @@ back1 = cv2.cvtColor(back1, cv2.COLOR_BGR2GRAY)
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
 
 # YOLO 설정
-net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg") # YOLO 파일 불러와서 모델 만들기
+net = cv2.dnn.readNet("yolov3-tiny.weights",
+                      "yolov3-tiny.cfg")  # YOLO 파일 불러와서 모델 만들기
 classes = []
-with open("coco.names", "r") as f: # 인식가능한 오브젝트(클래스) 이름들이 저장되어있는 파일
+with open("coco.names", "r") as f:  # 인식가능한 오브젝트(클래스) 이름들이 저장되어있는 파일
     classes = [line.strip() for line in f.readlines()]
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 np.random.seed(42)
-colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8') # 클래스 별 랜덤 색상 정해줌
+colors = np.random.randint(0, 255, size=(
+    len(classes), 3), dtype='uint8')  # 클래스 별 랜덤 색상 정해줌
 
 while(True):
     ret, frame1 = capture.read()
@@ -66,19 +68,21 @@ while(True):
 
     ret, frame2 = capture.read()
 
-    gray = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY) # 흑백으로 변환
+    gray = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)  # 흑백으로 변환
 
     # threshold
     # 임계값(127) 넘으면 백, 아니면 흑으로 바꿈
-    ret, th = cv2.threshold(gray ,127, 255, cv2.THRESH_BINARY)
+    ret, th = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
     # 이미지 영역별로 이진화 진행, 영역의 평균값을 임계값으로 설정, 영역(블록)사이즈 = 15
-    th2 = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 2)
+    th2 = cv2.adaptiveThreshold(
+        gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 2)
 
     # blur
-    blur = cv2.blur(frame2, (5, 5)) # 5 * 5 박스내 픽셀 평균값
-    gblur = cv2.GaussianBlur(frame2, (15,15), 0) # 2차원 가우시안 분포 이용, 가까운 픽셀에서 영향 많이 받음
-    mblur = cv2.medianBlur(frame2, 7) # 박스 내 픽셀들의 중간값, 박스 사이즈 = 7
-    bfblur = cv2.bilateralFilter(frame2, 10, 75, 75) # 윤곽선은 살리고 나머지는 블러 처리
+    blur = cv2.blur(frame2, (5, 5))  # 5 * 5 박스내 픽셀 평균값
+    # 2차원 가우시안 분포 이용, 가까운 픽셀에서 영향 많이 받음
+    gblur = cv2.GaussianBlur(frame2, (15, 15), 0)
+    mblur = cv2.medianBlur(frame2, 7)  # 박스 내 픽셀들의 중간값, 박스 사이즈 = 7
+    bfblur = cv2.bilateralFilter(frame2, 10, 75, 75)  # 윤곽선은 살리고 나머지는 블러 처리
 
     # canny edge detection
     # https://blog.naver.com/samsjang/220507996391
@@ -88,16 +92,17 @@ while(True):
 
     # face detection
     ret, mosaic = capture.read()
-    face_classifier = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    face_classifier = cv2.CascadeClassifier(
+        'haarcascade_frontalface_default.xml')
     faces = face_classifier.detectMultiScale(mosaic)
 
     # mosaic
     for (x, y, w, h) in faces:
         roi = mosaic[y:y+h, x:x+w]   # 관심영역 지정
-        roi = cv2.resize(roi, (w//15, h//15)) # 1/20 비율로 축소
+        roi = cv2.resize(roi, (w//15, h//15))  # 1/20 비율로 축소
         # 원래 크기로 확대
-        roi = cv2.resize(roi, (w,h), interpolation=cv2.INTER_AREA)
-        mosaic[y:y+h, x:x+w] = roi # 원본 이미지에 적용
+        roi = cv2.resize(roi, (w, h), interpolation=cv2.INTER_AREA)
+        mosaic[y:y+h, x:x+w] = roi  # 원본 이미지에 적용
 
     th = cv2.cvtColor(th, cv2.COLOR_GRAY2BGR)
     th2 = cv2.cvtColor(th2, cv2.COLOR_GRAY2BGR)
@@ -109,7 +114,8 @@ while(True):
     height, width, channels = frame3.shape
 
     # YOLO 객체 탐지
-    blob = cv2.dnn.blobFromImage(frame3, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+    blob = cv2.dnn.blobFromImage(
+        frame3, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
     # 네트워크의 인풋은 blob object임
     # A blob is a 4D numpy array object (images, channels, width, height).
     # cv.dnn.blobFromImage(img, scale, size, mean)
@@ -134,7 +140,7 @@ while(True):
             scores = detection[5:]
             class_id = np.argmax(scores)
             confidence = scores[class_id]
-            if confidence > 0.5: # 0.5보다 높으면 인식
+            if confidence > 0.5:  # 0.5보다 높으면 인식
                 center_x = int(detection[0] * width)
                 center_y = int(detection[1] * height)
                 w = int(detection[2] * width)
@@ -157,8 +163,8 @@ while(True):
             color = [int(c) for c in colors[class_ids[i]]]
             cv2.rectangle(frame3, (x, y), (x + w, y + h), color, 2)
             text = "{}: {:.4f}".format(classes[class_ids[i]], confidences[i])
-            cv2.putText(frame3, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-
+            cv2.putText(frame3, text, (x, y - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
 
     # 영상 여러개 한번에 보여주기 위해 합치는 과정
     result0 = np.hstack((frame1 * filter2, frame1 * filter3))
@@ -177,5 +183,3 @@ while(True):
 # 웹캠 종료, 모든 창 종료
 capture.release()
 cv2.destroyAllWindows()
-
-cv2.imshow()
