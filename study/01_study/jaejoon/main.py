@@ -183,5 +183,3 @@ while(True):
 # 웹캠 종료, 모든 창 종료
 capture.release()
 cv2.destroyAllWindows()
-
-cv2.im
