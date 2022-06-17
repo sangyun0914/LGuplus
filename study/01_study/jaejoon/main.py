@@ -170,7 +170,7 @@ while(True):
     # 영상 여러개 한번에 보여주기 위해 합치는 과정
     result0 = np.hstack((frame1 * filter2, frame1 * filter3))
     result1 = np.hstack((th, th2, canny))
-    result2 = np.hstack((gblur, bfblur, mosaic))
+    # result2 = np.hstack((gblur, bfblur, mosaic))
     result3 = np.hstack((gblur, bfblur, mosaic))
     result4 = np.hstack((frame1 * filter2, frame1 * filter3, frame3))
     result5 = np.vstack((result1, result3, result4))
