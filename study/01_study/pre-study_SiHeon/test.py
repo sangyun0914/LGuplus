@@ -7,6 +7,9 @@ import timeit
 #웹캠만 출력
 def justcam():
     capture = cv2.VideoCapture(0)
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -16,12 +19,21 @@ def justcam():
             # Ensure valid frame
             if status:
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(frame, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(frame, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('webcam', frame)
                 cv2.moveWindow('webcam', 0 , -100)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -34,7 +46,9 @@ def justcam():
 def faceblur():
     capture = cv2.VideoCapture(0) 
     faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-    
+    i=0
+    sum=0
+    SFPS=""
     while True:
         # Ensure camera is connected
         if capture.isOpened():
@@ -59,12 +73,21 @@ def faceblur():
                     roi = cv2.resize(roi, (w,h), interpolation=cv2.INTER_AREA)  
                     frame[y:y+h, x:x+w] = roi   # 원본 이미지에 적용
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(frame, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(frame, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('face blur', frame)
                 cv2.moveWindow('face blur', 420 , -100)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -76,6 +99,9 @@ def faceblur():
 #yolo를 사용한 물체 인식
 def yolo():
     capture = cv2.VideoCapture(0) 
+    i=0
+    sum=0
+    SFPS=""
     while True:
         # Ensure camera is connected
         if capture.isOpened():
@@ -105,7 +131,9 @@ def yolo():
 #canny edge 감지
 def edge():
     capture = cv2.VideoCapture(0) 
-
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -117,12 +145,21 @@ def edge():
             if status:
                 #frame=cv2.cvtColor(frame,cv2.COLOR_GRAY2BGR)
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(frame, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(frame, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('canny edge', frame)
                 cv2.moveWindow('canny edge', 0 , 220)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -131,7 +168,9 @@ def edge():
 #블러처리
 def blur():
     capture = cv2.VideoCapture(0) 
-
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -142,12 +181,21 @@ def blur():
             # Ensure valid frame
             if status:
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(frame, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(frame, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('blur', frame)
                 cv2.moveWindow('blur', 420 , 220)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -160,6 +208,9 @@ def blur():
 def backsub():
     capture = cv2.VideoCapture(0) 
     fgbg = cv2.createBackgroundSubtractorMOG2()
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -171,12 +222,21 @@ def backsub():
                 frame=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 fgmask = fgbg.apply(frame)
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(fgmask, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(fgmask, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 fgmask=cv2.resize(fgmask, (0, 0), None, .33, .33)
                 cv2.imshow('backgroundsub', fgmask)
                 cv2.moveWindow('backgroundsub', 840 , 220)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -189,6 +249,9 @@ def backsub():
 def back():
     capture = cv2.VideoCapture(0) 
     fgbg = cv2.createBackgroundSubtractorMOG2()
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -200,12 +263,21 @@ def back():
                 fgmask = fgbg.apply(frame)
                 back=fgbg.getBackgroundImage()
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
-                cv2.putText(back, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                FPS = 1./(terminate_t - start_t )
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(back, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 back=cv2.resize(back, (0, 0), None, .33, .33)
                 cv2.imshow('background', back)
                 cv2.moveWindow('background', 420 , 500)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -216,7 +288,10 @@ def back():
 
 #threhold 적용
 def threhold():
-    capture = cv2.VideoCapture(0) 
+    capture = cv2.VideoCapture(0)
+    i=0
+    sum=0
+    SFPS=""
     while True:
 
         # Ensure camera is connected
@@ -230,13 +305,22 @@ def threhold():
             # Ensure valid frame
             if status:
                 terminate_t = timeit.default_timer()
-                FPS = int(1./(terminate_t - start_t ))
-                FPS=str(FPS)
+                FPS = 1./(terminate_t - start_t )
                 frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-                cv2.putText(frame, "FPS : "+FPS,(20, 60), 0, 2, (255,0,0),3)
+                sum=FPS+sum
+                if SFPS=="":
+                    SFPS=str(FPS)
+                if i==10:
+                    sum=sum/10
+                    sum = round(sum,4)
+                    SFPS=str(sum)
+                    i=0
+                    sum=0
+                cv2.putText(frame, "FPS : "+SFPS,(20, 60), 0, 2, (255,0,0),3)
                 frame=cv2.resize(frame, (0, 0), None, .33, .33)
                 cv2.imshow('threhold', frame)
                 cv2.moveWindow('threhold', 0 , 500)
+                i+=1
             else:
                 break
             if cv2.waitKey(1) & 0xFF == ord('q'):
