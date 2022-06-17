@@ -20,7 +20,9 @@ net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 model = cv2.dnn_DetectionModel(net)
 model.setInputParams(size=(416,416), scale=1/255, swapRB=True)
 
+#캠열기
 cap = cv2.VideoCapture(0)
+
 #전경 검출
 ret, back = cap.read()
 back = cv2.cvtColor(back, cv2.COLOR_BGR2GRAY)
@@ -37,6 +39,31 @@ while True:
     #cam1 = cv2.resize(cam, (250, 250))
     cam2 = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
 
+    #threshold 처리
+    #ret, cam2 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY) #THRESH_BINARY 적용
+
+    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY_INV) #THRESH_BINARY_INV 적용
+
+    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TRUNC) #THRESH_TRUNC 적용
+
+    ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TOZERO) #THRESH_TOZERO 적용
+
+    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TOZERO_INV)
+
+    cam3 = cv2.cvtColor(cam3, cv2.COLOR_GRAY2BGR)
+
+    #blur 처리
+    #cam_blur = cv2.blur(cam,(5,5))
+    cam_blur_gaussian = cv2.GaussianBlur(cam,(5,5),0)
+    #cam_blur_median = cv2.medianBlur(cam, 5)
+    #cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
+
+    #Canny edge detection
+    edge = cv2.Canny(cam, 50, 150)
+    edge = cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
+    #edge2 = cv2.Canny(cam, 100, 200)
+    #edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
+    
     #전경 검출
     cam4 = cv2.resize(cam, (250, 150))
     gray = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
@@ -62,31 +89,6 @@ while True:
     back2 = bs.getBackgroundImage()
     fgmask = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
     back2 = cv2.cvtColor(back2, cv2.COLOR_GRAY2BGR)
-
-    #threshold 처리
-    #ret, cam2 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY) #THRESH_BINARY 적용
-
-    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_BINARY_INV) #THRESH_BINARY_INV 적용
-
-    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TRUNC) #THRESH_TRUNC 적용
-
-    ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TOZERO) #THRESH_TOZERO 적용
-
-    #ret, cam3 = cv2.threshold(cam2, 50, 255, cv2.THRESH_TOZERO_INV)
-
-    cam3 = cv2.cvtColor(cam3, cv2.COLOR_GRAY2BGR)
-
-    #blur 처리
-    #cam_blur = cv2.blur(cam,(5,5))
-    cam_blur_gaussian = cv2.GaussianBlur(cam,(5,5),0)
-    #cam_blur_median = cv2.medianBlur(cam, 5)
-    #cam_blur_bilateral = cv2.bilateralFilter(cam,9,75,75)
-
-    #Canny
-    edge = cv2.Canny(cam, 50, 150)
-    #edge2 = cv2.Canny(cam, 100, 200)
-    edge = cv2.cvtColor(edge, cv2.COLOR_GRAY2BGR)
-    #edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
 
     #face detect
     face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -125,6 +127,7 @@ while True:
 
     #detectImage = cv2.cvtColor(detectImage, cv2.COLOR_GRAY2BGR)
 
+    #캠 합치기
     numpy_horizontal1 = np.hstack((cam, cam3))
     numpy_horizontal2 = np.hstack((fgmask, back2))
     numpy_horizontal12 = np.hstack((numpy_horizontal1, numpy_horizontal2))
@@ -146,5 +149,6 @@ while True:
 
         if cv2.waitKey(1) &  0xFF == 27:
             break
+        
 cap.release()
 cv2.destroyAllWindows()
