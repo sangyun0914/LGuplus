@@ -91,6 +91,7 @@ while(True):
     canny = cv2.Canny(gray, 70, 200)
 
     # face detection
+    # https://m.blog.naver.com/dic1224/220989033563
     ret, mosaic = capture.read()
     face_classifier = cv2.CascadeClassifier(
         'haarcascade_frontalface_default.xml')
@@ -174,6 +175,7 @@ while(True):
     result4 = np.hstack((frame1 * filter2, frame1 * filter3, frame3))
     result5 = np.vstack((result1, result3, result4))
 
+    # 화면 띄우기
     cv2.imshow("pre-study", result5)
 
     # 키보드 입력시 종료
