@@ -27,7 +27,7 @@ cap = cv2.VideoCapture(0)
 ret, back = cap.read()
 back = cv2.cvtColor(back, cv2.COLOR_BGR2GRAY)
 back = cv2.GaussianBlur(back, (0,0),1)
-back = cv2.resize(back, (250, 150))
+back = cv2.resize(back, (250, 250))
 
 #배경 검출
 bs = cv2.createBackgroundSubtractorMOG2()
@@ -35,7 +35,7 @@ bs.setDetectShadows(False)
 
 while True:
     ret, cam = cap.read()
-    cam = cv2.resize(cam, (250, 150))
+    cam = cv2.resize(cam, (250, 250))
     #cam1 = cv2.resize(cam, (250, 250))
     cam2 = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
 
@@ -65,15 +65,15 @@ while True:
     #edge2 = cv2.cvtColor(edge2, cv2.COLOR_GRAY2BGR)
     
     #전경 검출
-    cam4 = cv2.resize(cam, (250, 150))
+    cam4 = cv2.resize(cam, (250, 250))
     gray = cv2.cvtColor(cam, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (0,0),1)
 
     diff = cv2.absdiff(gray, back)
-    _, diff = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
+    _, diff = cv2.threshold(diff, 30, 1, cv2.THRESH_BINARY)
 
-    cnt, _, stats, _ = cv2.connectedComponentsWithStats(diff)
-
+    #cnt, _, stats, _ = cv2.connectedComponentsWithStats(diff)
+    '''
     for i in range(1, cnt):
         x, y, w, h, s = stats[i]
 
@@ -81,7 +81,7 @@ while True:
             continue
 
         cv2.rectangle(cam4, (x,y,w,h), (0,0,255),2)
-
+    '''
     diff = cv2.cvtColor(diff, cv2.COLOR_GRAY2BGR)
 
     #배경 검출
@@ -96,8 +96,8 @@ while True:
 
     faces = face_cascade.detectMultiScale(cam2, 1.3, 5)
 
-    detectImage = cv2.resize(cam, (250, 150))
-    src = cv2.resize(cam, (250,150))
+    detectImage = cv2.resize(cam, (250, 250))
+    src = cv2.resize(cam, (250,250))
 
     ratio = 0.05
 
@@ -134,7 +134,7 @@ while True:
     numpy_horizontal12 = np.hstack((numpy_horizontal12, cam_blur_gaussian))
 
     numpy_horizontal5 = np.hstack((detectImage, src))
-    numpy_horizontal6 = np.hstack((cam4, diff))
+    numpy_horizontal6 = np.hstack((diff, diff*cam4))
     numpy_horizontal56 = np.hstack((numpy_horizontal5, numpy_horizontal6))
     numpy_horizontal56 = np.hstack((numpy_horizontal56, edge))
 
