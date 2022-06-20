@@ -96,6 +96,8 @@ while True:
 
   fgmask = fgbg.apply(frame_gray)
 
+  entrude = False
+
   # fgmask의 연결된 흰색부분 검출
   count, labels, stats, centroids = cv2.connectedComponentsWithStats(fgmask)
 
@@ -107,9 +109,15 @@ while True:
     if size < MINIMUM_AREA or h<MINIMUM_HEIGHT or w<MINIMUM_WIDTH:
       continue
     
+    entrude = True
+
     #검출된 부분을 원본영상(frame)에 빨간색으로 라벨링
     cv2.rectangle(frame, (frame_x+x, frame_y+y, w, h), (0, 0, 255), 2)
 
+  if (entrude == True):
+    cv2.putText(frame, "anomaly activitiy FOUND!", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+  else:
+    cv2.putText(frame, "anomaly activitiy didn't found", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 3)
   #사용자가 찍었던 좌표를 초록색 사각형으로 계속 보여줌
   cv2.rectangle(frame,(frame_x , frame_y , frame_xw-frame_x , frame_yh-frame_y),(0,255,0),10)
 
