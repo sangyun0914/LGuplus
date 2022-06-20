@@ -2,3 +2,4 @@
 *.DS_Store
 *.weights
 *.mp4
+!study/02_study/video/videoplayback.mp4

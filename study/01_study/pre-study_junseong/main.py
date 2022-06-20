@@ -65,11 +65,11 @@ def frame_process_faceblur(frame,faceCascade):
 
   # face detect
   faces = faceCascade.detectMultiScale(
-		gray,
-		scaleFactor=1.1,
-		minNeighbors=5,
-		minSize=(30, 30)
-	)
+    gray,
+    scaleFactor=1.1,
+    minNeighbors=5,
+    minSize=(30, 30)
+  )
 
   # detect된 face에 모자이크 처리
   for (x, y, w, h) in faces: # x : start position of x | y : start position of y | w : width | h : height
@@ -112,12 +112,11 @@ def frame_process_background_front(frame):
 
   return result
 
-def frame_process_background_rear(frame):
-  fgbg = cv2.createBackgroundSubtractorMOG()
-
+def frame_process_background_rear(frame, fgbg):
   fgmask = fgbg.apply(frame)
+  back = fgbg.getBackgroundImage()
 
-  return fgmask
+  return back
 
 # [frame처리 함수 : blur]
 '''
@@ -198,9 +197,10 @@ def yolo():
     bbox, label, conf = cv.detect_common_objects(frame,confidence=0.5, nms_thresh=0.3, model='yolov3', enable_gpu=False)
     out = draw_bbox(frame, bbox, label, conf, write_conf=True)
 
-    frame = cv2.resize(frame, None, fx=0.5, fy=0.5) #0.5배
+    frame = cv2.resize(frame, None, fx=0.25, fy=0.25) #0.5배
 
     cv2.imshow('yolo-object detection', frame)
+    cv2.moveWindow('yolo-object detection', 500 , 0)
 
     if cv2.waitKey(1) == ord('q'):
       break
@@ -222,6 +222,9 @@ def main():
   COLOR_RED = (0,0,255)
   COLOR_BLACK = (0,0,0) 
   THICKNESS = 2
+
+  #
+  fgbg = cv2.createBackgroundSubtractorMOG2()
 
   # 카메라 안 열리면 exit
   if not cap.isOpened():
@@ -250,6 +253,8 @@ def main():
     frame_blur = frame_process_blur(frame_blur)
     frame_threshold = frame_process_threshold(frame_threshold)
     frame_background_front = frame_process_background_front(frame_background_front)
+    fgmask = fgbg.apply(frame_background_rear)
+    frame_background_rear = fgbg.getBackgroundImage()
 
     # 이미지 높이
     height = frame_original.shape[0]
@@ -258,12 +263,12 @@ def main():
     # 이미지 색상 크기
     depth = frame_original.shape[2]
 
-    # 화면에 표시할 이미지 만들기 ( 2 x 2 )
+    # 화면에 표시할 이미지 만들기 ( 4 x 2 )
     view = create_image_multiple(height, width, depth, 4, 2)
 
     # 원하는 위치에 화면 넣기
     showMultiImage(view, frame_background_front, height,width,depth,0,0)
-    showMultiImage(view, frame_background_rear, height,width,depth,0,1)
+    showMultiImage(view, frame_background_rear, height, width , depth , 0, 1)
     showMultiImage(view, frame_faceblur, height, width, depth, 1, 0)
     showMultiImage(view, frame_canny, height, width, 1, 1, 1)
     showMultiImage(view, frame_original, height, width, depth, 2, 0)
