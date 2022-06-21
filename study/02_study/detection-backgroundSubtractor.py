@@ -117,7 +117,7 @@ while True:
   if (entrude == True):
     cv2.putText(frame, "anomaly activitiy FOUND!", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
   else:
-    cv2.putText(frame, "anomaly activitiy didn't found", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 3)
+    cv2.putText(frame, "anomaly activitiy not found", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 3)
   #사용자가 찍었던 좌표를 초록색 사각형으로 계속 보여줌
   cv2.rectangle(frame,(frame_x , frame_y , frame_xw-frame_x , frame_yh-frame_y),(0,255,0),10)
 
