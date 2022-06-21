@@ -18,7 +18,7 @@ x2, y2 = -1, -1
 img = None
 
 
-def draw_rectangle(event, x, y, flags, param):
+def set_roi(event, x, y, flags, param):
     global x1, y1, click, rec, x2, y2
 
     if event == cv2.EVENT_LBUTTONDOWN:  # 마우스를 누른 상태
@@ -54,7 +54,7 @@ def isHuman(w, h, area):
 
 
 cv2.namedWindow('frame')
-cv2.setMouseCallback('frame', draw_rectangle)
+cv2.setMouseCallback('frame', set_roi)
 
 while(True):
     ret, frame = video.read()
@@ -62,7 +62,7 @@ while(True):
     # (576, 768, 3)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # blur = cv2.dilate(gray, kernel=None)
-    blur = cv2.GaussianBlur(gray, (15, 15), 0)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
     back = mask.apply(blur)
 
     ret, labels, stats, centroids = cv2.connectedComponentsWithStats(back)
