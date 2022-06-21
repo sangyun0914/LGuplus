@@ -1,5 +1,14 @@
+# https://www.youtube.com/watch?v=hMIrQdX4BkE
+# https://www.youtube.com/watch?v=ticZclUYy88
+# https://jstar0525.tistory.com/2
+
+
 import cv2
+import labeling as mylabel
 import numpy as np
+import sys
+
+sys.setrecursionlimit(10**7)
 
 video = cv2.VideoCapture('test2.mp4')
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
@@ -12,6 +21,9 @@ while(True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (15, 15), 0)
     back = mask.apply(blur)
+
+    print(len(mylabel.labeling(back)))
+
     result = np.hstack((frame, cv2.cvtColor(back, cv2.COLOR_GRAY2BGR)))
     cv2.imshow('back', result)
     if cv2.waitKey(1) > 0:
