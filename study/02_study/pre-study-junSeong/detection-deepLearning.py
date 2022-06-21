@@ -103,10 +103,10 @@ def get_model_instance_segmentation(num_classes):
 
 def get_transform(train):
     transforms = []
-    transforms.append(T.PILToTensor())
+    transforms.append(torchvision.transforms.ToTensor())
     if train:
         transforms.append(T.RandomHorizontalFlip(0.5))
-    return T.Compose(transforms)
+    return T.Compose(torchvision.transforms.ToTensor())
 
 
 def main():
