@@ -6,7 +6,7 @@
 import cv2
 import numpy as np
 
-video = cv2.VideoCapture('test2.mp4')
+video = cv2.VideoCapture('test.mp4')
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
 # mask = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
 
@@ -47,7 +47,7 @@ def detection(x, y):
 
 
 def isHuman(w, h, area):
-    if h > 2 * w and area > 100:
+    if h > 2 * w and area > 10:
         return True
     else:
         return False
