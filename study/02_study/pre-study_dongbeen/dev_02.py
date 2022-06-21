@@ -39,6 +39,7 @@ def main():
     
     while True:
         ret, frame = cap.read()
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
         if not ret:
             break
@@ -53,10 +54,11 @@ def main():
         start = time.time()
         classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
         end = time.time()
+        #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         start_drawing = time.time()
         for (classid, score, box) in zip(classes, scores, boxes):
-            if classid == 0:
+            if classid == 0 and score >= 0.58:
                 color = COLORS[int(classid) % len(COLORS)]
                 label = "%s : %f" % (class_names[classid], score)
                 rect1 = [x0, y0, x0+w0, y0+h0]
@@ -92,6 +94,7 @@ def main():
 
             
         
+        #frame = cv2.resize(frame, (300,300))
         cv2.imshow('frame', frame)
         if cv2.waitKey(10) == 27:
             break
