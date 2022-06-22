@@ -1,6 +1,8 @@
 from charset_normalizer import detect
 import numpy as np
 import cv2
+import uuid
+import os
 
 #-------------------------------------------------------------------------------------------------------------------------------
 # [함수 정의]
@@ -50,7 +52,7 @@ def defineRectangle(point_list):
 #-------------------------------------------------------------------------------------------------------------------------------
 # [좌표 지정 phase]
 # video의 첫번째 프레임을 받아옴
-cap = cv2.VideoCapture('video/sample.mp4')
+cap = cv2.VideoCapture('video/carandhuman.mp4')
 ret_init,frame_init = cap.read()
 
 cap.release()
@@ -77,13 +79,15 @@ frame_x,frame_xw,frame_y,frame_yh = defineRectangle(point_list)
 #-------------------------------------------------------------------------------------------------------------------------------
 # [이상감지 phase]
 #video cap and make background subtractor
-cap = cv2.VideoCapture('video/sample.mp4')
+cap = cv2.VideoCapture('video/carandhuman.mp4')
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 
 # 최소 픽셀화소, 최소 높이, 최소 너비 정의
 MINIMUM_AREA = 250
 MINIMUM_HEIGHT = 3
 MINIMUM_WIDTH = 3
+
+frame_count = 0
 
 while True:
   ret, frame = cap.read()
@@ -125,12 +129,20 @@ while True:
 
   if (entrude == True):
     cv2.putText(frame, "anomaly activitiy FOUND!", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+
+    if (frame_count<=10):
+      frame_count += 1
+
+    elif (frame_count>10):
+      frame_count = 0
+      imgname = os.path.join('img', '{}.jpg'.format(str(uuid.uuid1())))
+      cv2.imwrite(imgname, RegionOfInterest)
     
   else:
     cv2.putText(frame, "anomaly activitiy not found", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 3)
 
   #사용자가 찍었던 좌표를 초록색 사각형으로 계속 보여줌
-  cv2.rectangle(frame,(frame_x , frame_y , frame_xw-frame_x , frame_yh-frame_y),(0,255,0),10)
+  cv2.rectangle(frame,(frame_x , frame_y , frame_xw-frame_x , frame_yh-frame_y),(0,255,0),3)
 
   # 원본 프레임에 detection을 적용한 부분 출력
   cv2.imshow('original',frame)
