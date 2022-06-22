@@ -1,7 +1,3 @@
-# https://www.youtube.com/watch?v=hMIrQdX4BkE
-# https://www.youtube.com/watch?v=ticZclUYy88
-# https://jstar0525.tistory.com/2
-
 import cv2
 import numpy as np
 
