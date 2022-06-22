@@ -52,6 +52,7 @@ def defineRectangle(point_list):
 # video의 첫번째 프레임을 받아옴
 cap = cv2.VideoCapture('video/sample.mp4')
 ret_init,frame_init = cap.read()
+
 cap.release()
 
 # 색깔 두께 drawing
