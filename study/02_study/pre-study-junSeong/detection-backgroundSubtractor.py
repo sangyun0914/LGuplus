@@ -52,7 +52,10 @@ def defineRectangle(point_list):
 #-------------------------------------------------------------------------------------------------------------------------------
 # [좌표 지정 phase]
 # video의 첫번째 프레임을 받아옴
-cap = cv2.VideoCapture('video/carandhuman.mp4')
+
+VIDEO_PATH = 'video/carandhuman.mp4'
+
+cap = cv2.VideoCapture(VIDEO_PATH)
 ret_init,frame_init = cap.read()
 
 cap.release()
@@ -79,13 +82,14 @@ frame_x,frame_xw,frame_y,frame_yh = defineRectangle(point_list)
 #-------------------------------------------------------------------------------------------------------------------------------
 # [이상감지 phase]
 #video cap and make background subtractor
-cap = cv2.VideoCapture('video/carandhuman.mp4')
+cap = cv2.VideoCapture(VIDEO_PATH)
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 
 # 최소 픽셀화소, 최소 높이, 최소 너비 정의
 MINIMUM_AREA = 250
 MINIMUM_HEIGHT = 3
 MINIMUM_WIDTH = 3
+CAPTURE_FRAME = 5
 
 frame_count = 0
 
@@ -130,10 +134,10 @@ while True:
   if (entrude == True):
     cv2.putText(frame, "anomaly activitiy FOUND!", (30,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
-    if (frame_count<=10):
+    if (frame_count<=CAPTURE_FRAME):
       frame_count += 1
 
-    elif (frame_count>10):
+    elif (frame_count>CAPTURE_FRAME):
       frame_count = 0
       imgname = os.path.join('img', '{}.jpg'.format(str(uuid.uuid1())))
       cv2.imwrite(imgname, RegionOfInterest)
