@@ -6,9 +6,7 @@ import uuid
 import os
 
 #-------------------------------------------------------------------------------------------------------------------------------
-# [함수 정의]
-# 네 개의 좌표를 받아옴
-
+# [class for detection]
 class detection:
   def __init__(self):
     self.model = torch.hub.load('ultralytics/yolov5', 'yolov5n')  # or yolov5n - yolov5x6, custom
@@ -62,6 +60,9 @@ class detection:
     else:
       return False
 
+#-------------------------------------------------------------------------------------------------------------------------------
+# [함수 정의]
+# 네 개의 좌표를 받아옴
 def mouse_handler(event, x, y, flags, param):
   global drawing
   dst_img = src_img.copy()
