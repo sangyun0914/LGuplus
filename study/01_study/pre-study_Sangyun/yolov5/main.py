@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import torch
+import torch.backends.cudnn as cudnn
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -22,7 +23,7 @@ device=torch.device('cpu')  # cuda device, i.e. 0 or 0,1,2,3 or cpu
 view_img=True  # show results
 save_crop=False  # save cropped prediction boxes
 nosave=True  # do not save images/videos
-classes=None  # filter by class: --class 0, or --class 0 2 3
+classes=0  # filter by class: --class 0, or --class 0 2 3
 augment=False  # augmented inference
 visualize=False  # visualize features
 update=False  # update all models
@@ -54,6 +55,7 @@ names = coco_names
 stride, pt = model.stride, model.pt
 imgsz = check_img_size([640,640], s=stride)  # check image size
 
+cudnn.benchmark = True
 dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt)
 bs = len(dataset)  # batch_size
 
@@ -62,7 +64,6 @@ bs = len(dataset)  # batch_size
 model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
 seen = 0
 for path, im, im0s, vid_cap, s in dataset:
-        original = im.copy()
         t1 = time_sync()
         im = torch.from_numpy(im).to(torch.device('cpu'))
         im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -76,7 +77,7 @@ for path, im, im0s, vid_cap, s in dataset:
         t3 = time_sync()
 
         # NMS
-        pred = non_max_suppression(pred, conf_thres = 0.25, iou_thres = 0.45, classes = None, agnostic = False, max_det=300)
+        pred = non_max_suppression(pred, conf_thres = 0.25, iou_thres = 0.45, classes = 0, agnostic = False, max_det=300)
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
@@ -97,7 +98,6 @@ for path, im, im0s, vid_cap, s in dataset:
 
             # Stream results
             im0 = annotator.result()
-            # cv2.imshow('original', original)
             cv2.imshow('yolov5s.mlmodel', im0)
             cv2.waitKey(1)  # 1 millisecond
 
