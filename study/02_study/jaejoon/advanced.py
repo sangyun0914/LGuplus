@@ -3,79 +3,101 @@ import numpy as np
 
 video = cv2.VideoCapture('test2.mp4')
 mask = cv2.bgsegm.createBackgroundSubtractorMOG()
-# mask = cv2.createBackgroundSubtractorMOG2(detectShadows=False)
 
-# Mouse 클릭된 상태 (false = 클릭 x / true = 클릭 o) : 마우스 눌렀을때 true로, 뗏을때 false로
-click = False
-rec = False
-x1, y1 = -1, -1
-x2, y2 = -1, -1
-img = None
+# roi 지정
+_, frame = video.read()
+x, y, w, h = cv2.selectROI('video', frame, False)
+cv2.destroyWindow("video")
 
+# yolo 모델 불러오기
+net = cv2.dnn.readNet("yolov3.weights",
+                      "yolov3.cfg")  # YOLO 파일 불러와서 모델 만들기
+classes = []
+with open("coco.names", "r") as f:  # 인식가능한 오브젝트(클래스) 이름들이 저장되어있는 파일
+    classes = [line.strip() for line in f.readlines()]
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
-def set_roi(event, x, y, flags, param):
-    global x1, y1, click, rec, x2, y2
+# 전경 라벨링 바운딩 박스 부분을 yolo로 돌려서 사람인지 인식
 
-    if event == cv2.EVENT_LBUTTONDOWN:  # 마우스를 누른 상태
-        click = True
-        rec = False
-        x1, y1 = x, y
-        print((x1, y1))
-
-    elif event == cv2.EVENT_MOUSEMOVE:  # 마우스 이동
-        if click == True:  # 마우스를 누른 상태 일경우
-            rec = True
-            x2, y2 = x, y
-
-    elif event == cv2.EVENT_LBUTTONUP:
-        click = False  # 마우스를 때면 상태 변경
-        rec = True
-        x2, y2 = x, y
-        print((x2, y2))
+cnt = 0
 
 
-def detection(x, y):
-    if x < x1 or x > x2 or y < y1 or y > y2:
-        return False
-    else:
-        return True
+def isHuman(frame):
+    flag = False
 
+    frame = cv2.resize(frame, dsize=(0, 0), fx=4, fy=4,
+                       interpolation=cv2.INTER_AREA)
+    frame = cv2.GaussianBlur(frame, (15, 15), 0)
 
-def isHuman(w, h, area):
-    if h > 2 * w and area > 10:
-        return True
-    else:
-        return False
+    # cv2.imwrite('img/'+str(cnt)+'.jpeg', frame)
 
+    height, width, channels = frame.shape
+    blob = cv2.dnn.blobFromImage(
+        frame, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+    net.setInput(blob)
+    outs = net.forward(output_layers)
 
-cv2.namedWindow('frame')
-cv2.setMouseCallback('frame', set_roi)
+    class_ids = []
+    confidences = []
+    boxes = []
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence > 0.5:  # 0.5보다 높으면 인식
+                #print('yolo detected')
+                center_x = int(detection[0] * width)
+                center_y = int(detection[1] * height)
+                w = int(detection[2] * width)
+                h = int(detection[3] * height)
+                x = int(center_x - w / 2)
+                y = int(center_y - h / 2)
+                boxes.append([x, y, w, h])
+                confidences.append(float(confidence))
+                class_ids.append(class_id)
+                if class_id == 0:
+                    flag = True
+                    return flag
+
+    return flag
+
 
 while(True):
     ret, frame = video.read()
-    # print(frame.shape)
-    # (576, 768, 3)
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # blur = cv2.dilate(gray, kernel=None)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    back = mask.apply(blur)
+    if w and h:
+        roi = frame[y:y+h, x:x+w]
 
+    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+    # roi 부분만 전경 추출 후 라벨링
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(roi, (5, 5), 0)
+    back = mask.apply(blur)
     ret, labels, stats, centroids = cv2.connectedComponentsWithStats(back)
 
-    flag = False
+    flag = False  # 첫번째 stats 무시하려는 플래그
+    detect = False  # roi에 사람 인식되었는지 체크
+
     for s in stats:
         if flag:
-            if detection(s[0], s[1]) and isHuman(s[2], s[3], s[4]):
-                cv2.rectangle(
-                    frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255), 5)
-            cv2.rectangle(frame, (s[0], s[1]),
-                          (s[0] + s[2], s[1]+s[3]), (255, 0, 0), 1)
+            #cv2.rectangle(roi, (s[0], s[1]), (s[0] + s[2], s[1]+s[3]), (255, 0, 0), 1)
+            #cv2.imshow('maybe', roi[s[0]:s[0]+s[2], s[1]:s[1]+s[3]])
+            #cv2.imwrite('img/'+str(cnt)+'.jpeg',roi[s[1]:s[1]+s[3], s[0]:s[0]+s[2]])
+            cnt += 1
+            if (s[4] > 100):
+                if isHuman(roi[s[1]:s[1]+s[3], s[0]:s[0]+s[2]]):
+                    # cv2.imshow('maybe human', roi[s[0]:s[0]+s[2], s[1]:s[1]+s[3]])
+                    detect = True
+                    print('human detected')
         else:
             flag = True
 
-    if rec:
-        cv2.rectangle(frame, (x1, y1),
-                      (x2, y2), (0, 255, 0), 2)
+    if detect:
+        cv2.rectangle(frame, (0, 0),
+                      (frame.shape[1], frame.shape[0]), (0, 0, 255), 2)
+
     cv2.imshow('frame', frame)
 
     if cv2.waitKey(1) > 0:

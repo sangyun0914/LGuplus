@@ -70,6 +70,7 @@ while(True):
     for s in stats:
         if flag:
             if detection(s[0], s[1]) and isHuman(s[2], s[3], s[4]):
+                # 인식되었을때 화면 전체 빨간 테두리 알림 표시
                 cv2.rectangle(
                     frame, (0, 0), (frame.shape[1], frame.shape[0]), (0, 0, 255), 5)
             cv2.rectangle(frame, (s[0], s[1]),
@@ -77,7 +78,7 @@ while(True):
         else:
             flag = True
 
-    if rec:
+    if rec:  # roi 표시
         cv2.rectangle(frame, (x1, y1),
                       (x2, y2), (0, 255, 0), 2)
     cv2.imshow('frame', frame)
