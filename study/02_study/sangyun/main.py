@@ -62,7 +62,7 @@ class detection:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
             assert ret
             roi = frame[y:y+h, x:x+w]
-           
+
             start_time = time()
             labels, cord = self.score_frame(roi)
             # print("results:", (results))
