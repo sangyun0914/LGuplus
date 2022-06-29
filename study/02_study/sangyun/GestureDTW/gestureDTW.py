@@ -1,3 +1,5 @@
+# Reference base code: https://github.com/gabguerin/Sign-Language-Recognition--MediaPipe-DTW/
+
 import cv2
 import mediapipe as mp
 import os
