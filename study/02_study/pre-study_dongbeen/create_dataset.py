@@ -4,10 +4,10 @@ import os
 import time
 
 IMAGES_PATH = os.path.join('data', 'images') # 현재 위치에 data/images폴더 미리 만들어 주세요
-labels = ['scrollup', 'scrolldown'] # 학습시킬 classes
-number_imgs = 5 # label 당 몇 장의 사진을 찍을 것인지
+labels = ['ok'] # 학습시킬 classes
+number_imgs = 40 # label 당 몇 장의 사진을 찍을 것인지
 
-cap = cv2.VideoCapture(0) # 웹캠을 받아옴
+cap = cv2.VideoCapture(1) # 웹캠을 받아옴
 
 # labels를 순환
 for label in labels:
