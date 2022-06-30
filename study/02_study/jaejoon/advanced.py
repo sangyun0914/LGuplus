@@ -30,7 +30,7 @@ def isHuman(frame):
                        interpolation=cv2.INTER_AREA)
     frame = cv2.GaussianBlur(frame, (15, 15), 0)
 
-    # cv2.imwrite('img/'+str(cnt)+'.jpeg', frame)
+    cv2.imwrite('img/'+str(cnt)+'.jpeg', frame)
 
     height, width, channels = frame.shape
     blob = cv2.dnn.blobFromImage(
