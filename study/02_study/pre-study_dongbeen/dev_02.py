@@ -35,7 +35,7 @@ def main():
     y0 = 200
     w0 = 150
     h0 = 150
-    
+
     
     while True:
         ret, frame = cap.read()
@@ -101,7 +101,7 @@ def main():
         cv2.imshow('frame', frame)
         if cv2.waitKey(10) == 27:
             break
-     
+    
     #cascade 사용 
     '''
     while True:
