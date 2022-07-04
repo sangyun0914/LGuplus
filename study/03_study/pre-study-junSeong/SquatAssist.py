@@ -12,6 +12,8 @@ mp_selfie_segmentation = mp.solutions.selfie_segmentation
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
+state = "down"
+count = 0
 # start detection
 cap = cv2.VideoCapture(0)
 with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
@@ -34,13 +36,9 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
 
     # 24, 28
     # 23, 27
+
     image.flags.writeable = True
     if results.pose_landmarks:
-      if (cur_image == STAND):
-        pre_image = STAND
-      else:
-        pre_image = SQUAT
-        
       landmark_pose = results.pose_landmarks.landmark
 
       targetDistance = dlist(landmark_pose[26].x * image_width, landmark_pose[26].y * image_height, landmark_pose[28].x * image_width, landmark_pose[28].y * image_height)
@@ -61,15 +59,15 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
       else :
         cur_image = STAND
 
-      if (pre_image == SQUAT and cur_image == STAND):
-        print("UP")
+      if (cur_image == SQUAT):
+        state = "down"
 
-      elif (pre_image == STAND and cur_image == SQUAT):
-        print("DOWN")
+      if (cur_image == STAND and state == "down"):
+        state = "up"
+        count += 1
+        print("Total squat : ", count)
 
-      print("pre : {} , cur : {}".format(pre_image, cur_image))
       # print("Right : {}, Left : {}".format(distanceRight,distanceLeft))
-
 
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     mp_drawing.draw_landmarks(
