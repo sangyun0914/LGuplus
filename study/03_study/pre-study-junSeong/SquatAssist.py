@@ -41,6 +41,7 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
     if results.pose_landmarks:
       landmark_pose = results.pose_landmarks.landmark
 
+      # cv2.line(image, (landmark_pose[26].x * image_width , landmark_pose[26].y * image_height) , (landmark_pose[28].x * image_width,landmark_pose[28].y * image_height), (0,255,0), 3, cv2.LINE_8)
       targetDistance = dlist(landmark_pose[26].x * image_width, landmark_pose[26].y * image_height, landmark_pose[28].x * image_width, landmark_pose[28].y * image_height)
       distanceRight = dlist(landmark_pose[24].x * image_width, landmark_pose[24].y * image_height, landmark_pose[28].x * image_width, landmark_pose[28].y * image_height)
       distanceLeft = dlist(landmark_pose[23].x * image_width, landmark_pose[23].y * image_height, landmark_pose[27].x * image_width, landmark_pose[27].y * image_height)
