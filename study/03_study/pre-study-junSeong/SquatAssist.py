@@ -4,7 +4,10 @@ import math
 import cv2
 
 def dlist(x1,y1,x2,y2):
-    return math.sqrt(math.pow(x1-x2,2)+ math.pow(y1-y2,2))
+  return math.sqrt(math.pow(x1-x2,2)+ math.pow(y1-y2,2))
+
+def DrawSkeleton():
+  pass
 
 # prepare for detection
 mp_drawing = mp.solutions.drawing_utils
@@ -40,6 +43,20 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
     image.flags.writeable = True
     if results.pose_landmarks:
       landmark_pose = results.pose_landmarks.landmark
+
+      # get infor about pos
+      RIGHT_SHOULDER = landmark_pose[12]
+      LEFT_SHOULDER = landmark_pose[11]
+      RIGHT_ELBOW = landmark_pose[14]
+      LEFT_ELBOW = landmark_pose[13]
+      RIGHT_WRIST = landmark_pose[16]
+      LEFT_WRIST = landmark_pose[15]
+      RIGHT_HIP = landmark_pose[24]
+      LEFT_HIP = landmark_pose[23]
+      RIGHT_KNEE = landmark_pose[26]
+      LEFT_KNEE = landmark_pose[25]
+      RIGHT_ANKEL = landmark_pose[28]
+      LEFT_ANKEL = landmark_pose[27]
 
       # cv2.line(image, (landmark_pose[26].x * image_width , landmark_pose[26].y * image_height) , (landmark_pose[28].x * image_width,landmark_pose[28].y * image_height), (0,255,0), 3, cv2.LINE_8)
       targetDistance = dlist(landmark_pose[26].x * image_width, landmark_pose[26].y * image_height, landmark_pose[28].x * image_width, landmark_pose[28].y * image_height)
