@@ -8,3 +8,5 @@ study/02_study/pre-study-junSeong/PennFudanPed
 library/PyTorch/data/*
 study/02_study/pre-study-junSeong/img/*
 *.pickle
+#*.pyc
+*__pychache__
