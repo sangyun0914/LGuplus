@@ -37,9 +37,11 @@ def main():
         # np.clip -> array 값이 지정한 최솟값보다 작으면 그  최솟값으로 지정, 만약 지정한 최댓값보다 크면 최댓값으로 고정
         # np.uint8 -> 1byte 만큼의 정수표현
         mh = np.uint8(np.clip((motion_history - (timestamp - MHI_DURATION)) / MHI_DURATION, 0, 1) * 255)
-        cv2.imshow('motion-history', mh)
-        cv2.imshow('raw', frame)
+        im_color = cv2.applyColorMap(mh, cv2.COLORMAP_JET)
 
+        cv2.imshow('motion-history', im_color)
+        cv2.imshow('raw', frame)
+        
         prev_frame = frame.copy()
         if 0xFF & cv2.waitKey(5) == 27:
             break
