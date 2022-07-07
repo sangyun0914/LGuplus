@@ -347,7 +347,7 @@ class WebcamManager(object):
                 color=(232, 254, 255), thickness=1, circle_radius=1
             ),
             connection_drawing_spec=mp_drawing.DrawingSpec(
-                color=(255, 249, 161), thickness=2, circle_radius=2
+                color= RED_COLOR, thickness=2, circle_radius=2
             ),
         )
         # Draw right hand connections
