@@ -11,8 +11,8 @@ import uuid
 DATA_PATH = os.path.join('Data') 
 
 # Actions that we try to detect
-# actions = np.array(['lunge-down','lunge-up','crunch-down','crunch-up'])
-actions = np.array(['lunge-down','lunge-up'])
+actions = np.array(['lunge-down','lunge-up','crunch-down','crunch-up'])
+
 # Thirty videos worth of data
 no_sequences = 5
 
