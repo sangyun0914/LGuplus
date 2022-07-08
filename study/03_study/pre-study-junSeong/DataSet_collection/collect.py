@@ -36,9 +36,8 @@ for action in actions:
         height = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         fps = int(fps)
-
         fps_low = int(fps * 0.7)
-        fps_high = int(fps * 1.2)
+        fps_high = int(fps * 1.3)
 
         #                                       운동번호 일련번호 번호 프레임
         videopath = os.path.join(DATA_PATH,action,'{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps)))
@@ -52,10 +51,15 @@ for action in actions:
         print('Collecting frames for {} Video Number {}'.format(action, sequence))
         for frame_num in range(sequence_length):
             ret, frame = cap.read()
+            show_frame = frame.copy()
+
+            print('Collecting frames for {} Video Number {}'.format(action, sequence))
+            cv2.putText(show_frame,'Collecting frames for {} Video Number {}'.format(action, sequence), (50,50), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 1)
+            cv2.imshow('Realtime view',show_frame)
             # NEW Apply wait logic
             if frame_num == 0: 
                 print('STARTING COLLECTION for {} wait...'.format(action))
-                cv2.imshow('Data collection', frame)
+                # cv2.imshow('Data collection', frame)
                 cv2.waitKey(5000)
                 # Show to screen
 
@@ -65,7 +69,7 @@ for action in actions:
 
             else: 
                 # Show to screen
-                cv2.imshow('Data collection', frame)
+                # cv2.imshow('Data collection', frame)
                 out.write(frame) # 영상데이터만 저장 (소리 X)
                 out_low.write(frame)
                 out_high.write(frame)
