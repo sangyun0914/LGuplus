@@ -11,7 +11,7 @@ import uuid
 DATA_PATH = os.path.join('Data') 
 
 # Actions that we try to detect
-actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up','crunch-down','crunch-up'])
+actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
 
 # Thirty videos worth of data
 no_sequences = 5
@@ -20,6 +20,9 @@ no_sequences = 5
 sequence_length = 30
 
 cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_AUTOFOCUS,0)
+cap.set(cv2.CAP_PROP_WHITE_BALANCE_BLUE_U, 0)
+cap.set(cv2.CAP_PROP_WHITE_BALANCE_RED_V, 0)
 # Set mediapipe model 
 
 # NEW LOOP
@@ -37,7 +40,7 @@ for action in actions:
         fps = cap.get(cv2.CAP_PROP_FPS)
         fps = int(fps)
 
-        #                                       운동번호 일련번호 번호 프레임 flip(true or false)
+        #                                       운동번호 일련번호 번호 프레임 (true or false)
         videopath = os.path.join(DATA_PATH,action,'{}-{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps),str(0)))
         videopath_flip = os.path.join(DATA_PATH,action,'{}-{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps),str(1)))
 

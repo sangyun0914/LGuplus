@@ -1,5 +1,4 @@
 from tkinter import RIGHT
-import mediapipe as mp
 import numpy as np
 import math
 import cv2
@@ -104,60 +103,23 @@ def CalculateXMaxMinYMaxMin():
   pass
 
 def main(VIDEO_PATH):
-  # prepare for detection
-  mp_drawing = mp.solutions.drawing_utils
-  mp_selfie_segmentation = mp.solutions.selfie_segmentation
-  mp_drawing_styles = mp.solutions.drawing_styles
-  mp_pose = mp.solutions.pose
 
   # start detection
   cap = cv2.VideoCapture(VIDEO_PATH)
-  ret, frame = cap.read()
-  h, w = frame.shape[:2]
-  prev_frame = frame.copy()
-  motion_history = np.zeros((h, w), np.float32)
-  timestamp = 0
+  cap.set(cv2.CAP_PROP_AUTOFOCUS,0)
+  cap.set(cv2.CAP_PROP_WHITE_BALANCE_BLUE_U, 0)
+  cap.set(cv2.CAP_PROP_WHITE_BALANCE_RED_V, 0)
+  while cap.isOpened():
+    success, image = cap.read()
+    if not success:
+      continue
+    
+    image_height, image_width, _ = image.shape
 
-  with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
-    while cap.isOpened():
-      success, image = cap.read()
-      if not success:
-        continue
-      
-      image_height, image_width, _ = image.shape
-
-      image.flags.writeable = False
-      image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-      results = pose.process(image)
-
-      image.flags.writeable = True
-      if results.pose_landmarks:
-        landmark_pose = results.pose_landmarks.landmark
-
-        image = DrawSkeleton(image,landmark_pose)
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-        frame_diff = cv2.absdiff(image, prev_frame)
-        gray_diff = cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY)
-        ret, fgmask = cv2.threshold(gray_diff, DEFAULT_THRESHOLD, 1, cv2.THRESH_BINARY)
-        timestamp += 1
-
-        # update motion history
-        cv2.motempl.updateMotionHistory(fgmask, motion_history, timestamp, MHI_DURATION)
-
-        # normalize motion history
-        # np.clip -> array 값이 지정한 최솟값보다 작으면 그  최솟값으로 지정, 만약 지정한 최댓값보다 크면 최댓값으로 고정
-        # np.uint8 -> 1byte 만큼의 정수표현
-        motionhistory = np.uint8(np.clip((motion_history - (timestamp - MHI_DURATION)) / MHI_DURATION, 0, 1) * 255)
-        cv2.imshow('motionhistory', cv2.flip(motion_history,1))
-        im_color = cv2.applyColorMap(motionhistory, cv2.COLORMAP_JET)
-
-        # cv2.imshow('motion-history', cv2.flip(im_color,1))
-        
-        prev_frame = frame.copy()
-      # cv2.imshow('Skeleton MHI', cv2.flip(image, 1))
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    cv2.imshow('auto focus off',image)
+    # cv2.imshow('Skeleton MHI', cv2.flip(image, 1))
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+      break
 
   cap.release()
 
