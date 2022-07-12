@@ -3,6 +3,7 @@ import mediapipe as mp
 import numpy as np
 import math
 import cv2
+from pyparsing import col
 
 MHI_DURATION = 50
 DEFAULT_THRESHOLD = 32
@@ -25,6 +26,9 @@ def DrawSkeleton(image, landmark_pose):
   LEFT_SHOULDER = landmark_pose[11]
   LEFT_SHOULDER_X = int(LEFT_SHOULDER.x * image_width)
   LEFT_SHOULDER_Y = int(LEFT_SHOULDER.y * image_height)
+
+  CENTER_SHOULDER_X = int((RIGHT_SHOULDER_X+LEFT_SHOULDER_X)/2)
+  CENTER_SHOULDER_Y = int((RIGHT_SHOULDER_Y+LEFT_SHOULDER_Y)/2)
 
   RIGHT_ELBOW = landmark_pose[14]
   RIGHT_ELBOW_X = int(RIGHT_ELBOW.x * image_width)
@@ -49,6 +53,9 @@ def DrawSkeleton(image, landmark_pose):
   LEFT_HIP = landmark_pose[23]
   LEFT_HIP_X = int(LEFT_HIP.x * image_width)
   LEFT_HIP_Y = int(LEFT_HIP.y * image_height)
+
+  CENTER_HIP_X = int((RIGHT_HIP_X+LEFT_HIP_X)/2)
+  CENTER_HIP_Y = int((RIGHT_HIP_Y+LEFT_HIP_Y)/2) 
 
   RIGHT_KNEE = landmark_pose[26]
   RIGHT_KNEE_X = int(RIGHT_KNEE.x * image_width)
@@ -79,6 +86,18 @@ def DrawSkeleton(image, landmark_pose):
   cv2.circle(image, (RIGHT_ANKEL_X,RIGHT_ANKEL_Y), RADIUS , (0,255,255) , cv2.FILLED , cv2.LINE_AA) 
   cv2.circle(image, (LEFT_ANKEL_X,LEFT_ANKEL_Y), RADIUS , (0,255,255) , cv2.FILLED , cv2.LINE_AA)
 
+  cv2.line(image, (RIGHT_WRIST_X , RIGHT_WRIST_Y) , (RIGHT_ELBOW_X, RIGHT_ELBOW_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (RIGHT_ELBOW_X , RIGHT_ELBOW_Y) , (RIGHT_SHOULDER_X, RIGHT_SHOULDER_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (RIGHT_SHOULDER_X , RIGHT_SHOULDER_Y) , (LEFT_SHOULDER_X, LEFT_SHOULDER_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (LEFT_SHOULDER_X , LEFT_SHOULDER_Y) , (LEFT_ELBOW_X, LEFT_ELBOW_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (LEFT_ELBOW_X , LEFT_ELBOW_Y) , (LEFT_WRIST_X, LEFT_WRIST_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (RIGHT_HIP_X , RIGHT_HIP_Y) , (RIGHT_KNEE_X, RIGHT_KNEE_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (RIGHT_KNEE_X , RIGHT_KNEE_Y) , (RIGHT_ANKEL_X, RIGHT_ANKEL_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (LEFT_HIP_X , LEFT_HIP_Y) , (LEFT_KNEE_X, LEFT_KNEE_X), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (LEFT_KNEE_X , LEFT_KNEE_Y) , (LEFT_ANKEL_X, LEFT_ANKEL_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (RIGHT_HIP_X , RIGHT_HIP_Y) , (LEFT_HIP_X, LEFT_HIP_Y), (0,255,255), 3, cv2.LINE_AA)
+  cv2.line(image, (CENTER_HIP_X , CENTER_HIP_Y) , (CENTER_SHOULDER_X, CENTER_SHOULDER_Y), (0,255,255), 3, cv2.LINE_AA)
+  
   return image
 
 def CalculateXMaxMinYMaxMin():
