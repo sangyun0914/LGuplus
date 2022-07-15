@@ -107,7 +107,7 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
       # cv2.circle(img, (RIGHT_KNEE.x , RIGHT_KNEE.y), 2 , (0,255,255) , cv2.FILLED , cv2.LINE_AA) 
       # cv2.circle(img, (LEFT_KNEE.x , LEFT_KNEE.y), 2 , (0,255,255) , cv2.FILLED , cv2.LINE_AA) 
       # cv2.circle(img, (RIGHT_ANKEL.x, RIGHT_ANKEL.y), 2 , (0,255,255) , cv2.FILLED , cv2.LINE_AA) 
-      # cv2.circle(img, (LEFT_ANKEL.x , LEFT_ANKEL.y), 2 , (0,255,255) , cv2.FILLED , cv2.LINE_AA) 
+      # cv2.circle(img, (LEFT_ANKEL.x , LEFT_ANKEL.y), 2 , (0,255,255) , cv2.FILLED , cv2.LINE_AA)
 
       mp_drawing.draw_landmarks(
         img,
