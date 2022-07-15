@@ -4,7 +4,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-video = '/Users/jaejoon/LGuplus/main_project/rnn/01-202207081445-0-14.avi'
+video = '/Users/jaejoon/LGuplus/main_project/rnn/test2.avi'
 
 # For webcam input:
 cap = cv2.VideoCapture(video)
