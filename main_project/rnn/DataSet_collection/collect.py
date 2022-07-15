@@ -6,12 +6,18 @@ import os
 from matplotlib import pyplot as plt
 import time
 import uuid
+import mediapipe as mp
+
+mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_pose = mp.solutions.pose
 
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join('Data') 
+DATA_PATH = os.path.join('Data')
 
 # Actions that we try to detect
-actions = np.array(['lunge-down','lunge-up','crunch-down','crunch-up'])
+actions = np.array(['squat-down', 'squat-up', 'pushup-down',
+                   'pushup-up', 'lunge-down', 'lunge-up'])
 
 # Thirty videos worth of data
 no_sequences = 5
@@ -20,7 +26,10 @@ no_sequences = 5
 sequence_length = 30
 
 cap = cv2.VideoCapture(0)
-# Set mediapipe model 
+cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+cap.set(cv2.CAP_PROP_WHITE_BALANCE_BLUE_U, 0)
+cap.set(cv2.CAP_PROP_WHITE_BALANCE_RED_V, 0)
+# Set mediapipe model
 
 # NEW LOOP
 # Loop through actions
@@ -36,56 +45,51 @@ for action in actions:
         height = round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         fps = int(fps)
-        fps_low = int(fps * 0.7)
-        fps_high = int(fps * 1.3)
 
-        #                                       운동번호 일련번호 번호 프레임
-        videopath = os.path.join(DATA_PATH,action,'{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps)))
-        videopath_low = os.path.join(DATA_PATH,action,'{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps_low)))
-        videopath_high = os.path.join(DATA_PATH,action,'{}-{}-{}-{}.avi'.format(str('0'+str(action_num)),datetime.today().strftime('%Y%m%d%H%M'),str(sequence),str(fps_high)))
+        #                                       운동번호 일련번호 번호 프레임 (true or false)
+        videopath = os.path.join(DATA_PATH, action, '{}-{}-{}-{}-{}.avi'.format(str('0'+str(
+            action_num)), datetime.today().strftime('%Y%m%d%H%M'), str(sequence), str(fps), str(0)))
+        videopath_flip = os.path.join(DATA_PATH, action, '{}-{}-{}-{}-{}.avi'.format(str('0'+str(
+            action_num)), datetime.today().strftime('%Y%m%d%H%M'), str(sequence), str(fps), str(1)))
 
-        out = cv2.VideoWriter(videopath, fourcc, fps, (width,height))
-        out_low = cv2.VideoWriter(videopath_low, fourcc, fps_low, (width,height))
-        out_high = cv2.VideoWriter(videopath_high, fourcc, fps_high, (width,height))
+        out = cv2.VideoWriter(videopath, fourcc, fps, (width, height))
+        out_flip = cv2.VideoWriter(
+            videopath_flip, fourcc, fps, (width, height))
 
-        print('Collecting frames for {} Video Number {}'.format(action, sequence))
         for frame_num in range(sequence_length):
+            if (frame_num == 0):
+                print('STARTING COLLECTION for {} (video number {}) wait...'.format(
+                    action, sequence))
+                input("press any button to continue : ")
+
             ret, frame = cap.read()
             show_frame = frame.copy()
 
             print('Collecting frames for {} Video Number {}'.format(action, sequence))
-            cv2.putText(show_frame,'Collecting frames for {} Video Number {}'.format(action, sequence), (50,50), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 1)
-            cv2.imshow('Realtime view',show_frame)
+            cv2.putText(show_frame, 'Collecting frames for {} Video Number {}'.format(
+                action, sequence), (50, 50), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
+            cv2.imshow('Realtime view', show_frame)
+
+            frame_flip = cv2.flip(frame, 1)
             # NEW Apply wait logic
-            if frame_num == 0: 
-                print('STARTING COLLECTION for {} wait...'.format(action))
-                # cv2.imshow('Data collection', frame)
-                cv2.waitKey(5000)
-                # Show to screen
 
-                out.write(frame) # 영상데이터만 저장 (소리 X)
-                out_low.write(frame)
-                out_high.write(frame)
+            if (frame_num == 0):
+                out.write(frame)  # 영상데이터만 저장 (소리 X)
+                out_flip.write(frame_flip)
+            else:
+                out.write(frame)  # 영상데이터만 저장 (소리 X)
+                out_flip.write(frame_flip)
 
-            else: 
-                # Show to screen
-                # cv2.imshow('Data collection', frame)
-                out.write(frame) # 영상데이터만 저장 (소리 X)
-                out_low.write(frame)
-                out_high.write(frame)
-
-            # Break gracefully
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
-        
+
         print('save to ', videopath)
-        print('save to ', videopath_low)
-        print('save to ', videopath_high)
-        cv2.waitKey(2000)
+        print('save to ', videopath_flip)
+
+        # cv2.waitKey(1000)
     action_num += 1
 
 out.release()
-out_high.release()
-out_low.release()
+out_flip.release()
 cap.release()
 cv2.destroyAllWindows()
