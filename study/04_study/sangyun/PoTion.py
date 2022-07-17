@@ -109,7 +109,7 @@ for joints in range(0,33):
         -1)
 
     
-    cv2.imwrite("video/joints/joint " + str(joints) + ".png", blank_image)
+    cv2.imwrite(str(PATH) + "/video/joints/joint " + str(joints) + ".png", blank_image)
 
     #cv2.imshow('Raw skeleton', blank_image)
     if cv2.waitKey(5) & 0xFF == 27:
@@ -139,10 +139,11 @@ for result_idx in range(result_arr_len):
   cv2.imshow("PoTion", blank_image)  
   cv2.imshow("Joints", blank_image2)
 
+  cv2.imwrite(str(PATH) + "/video/joints/Result2.png", blank_image)
   cv2.waitKey(0)
   cv2.destroyAllWindows()
 
 cv2.imshow("PoTion", blank_image)
-cv2.imwrite("video/joints/Result.png", blank_image)
+
 
 cap.release()
