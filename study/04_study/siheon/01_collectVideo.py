@@ -29,7 +29,7 @@ def extract_keypoints(results):
 
 
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data') 
+DATA_PATH = os.path.join('Data') 
 
 # Actions that we try to detect
 actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
@@ -90,8 +90,9 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                 
                 # NEW Export keypoints
                 keypoints = extract_keypoints(results)
-                npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
-                np.save(npy_path, keypoints)
+                print(keypoints)
+                # npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
+                # np.save(npy_path, keypoints)
 
                 # Break gracefully
                 if cv2.waitKey(10) & 0xFF == ord('q'):
