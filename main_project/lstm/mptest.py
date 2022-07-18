@@ -4,9 +4,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-video = '/Users/jaejoon/LGuplus/main_project/rnn/test2.avi'
+video = 0
 
-# For webcam input:
 cap = cv2.VideoCapture(video)
 with mp_pose.Pose(
         min_detection_confidence=0.5,
@@ -24,6 +23,8 @@ with mp_pose.Pose(
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image)
 
+        print(results.pose_world_landmarks)
+
         # Draw the pose annotation on the image.
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -34,6 +35,10 @@ with mp_pose.Pose(
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
         # Flip the image horizontally for a selfie-view display.
         cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
+
+        mp_drawing.plot_landmarks(
+            results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
+
         if cv2.waitKey(5) & 0xFF == 27:
             break
 cap.release()
