@@ -89,13 +89,13 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                 
                 # NEW Export keypoints
                 keypoints = extract_keypoints(results)
-                print(action,"------- ("+sequence+"/"+sequence_length+")")
                 npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
                 np.save(npy_path, keypoints)
 
                 # Break gracefully
                 if cv2.waitKey(10) & 0xFF == ord('q'):
                     break
+            print(action,"------- ("+str(sequence)+"/"+str(sequence_length)+")")
                     
     cap.release()
     cv2.destroyAllWindows()
