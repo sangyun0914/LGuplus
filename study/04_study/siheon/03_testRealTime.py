@@ -35,7 +35,7 @@ def draw_styled_landmarks(image, results):
                              ) 
 
 def extract_keypoints(results):
-    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33*4)
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten() if results.pose_world_landmarks else np.zeros(33*4)
     return np.concatenate([pose])
 
 colors = [(245,117,16), (117,245,16), (16,117,245),(16,245,117),(117,16,245),(245,16,117)]

@@ -12,7 +12,6 @@ from tensorflow.keras.callbacks import TensorBoard
 
 # Path for exported data, numpy arrays
 DATA_PATH = os.path.join('Data') 
-
 # Actions that we try to detect
 actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
 
