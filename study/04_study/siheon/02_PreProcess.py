@@ -11,7 +11,7 @@ from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.callbacks import TensorBoard
 
 # Path for exported data, numpy arrays
-DATA_PATH = os.path.join('MP_Data') 
+DATA_PATH = os.path.join('Data') 
 
 # Actions that we try to detect
 actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
@@ -36,6 +36,7 @@ for action in actions:
         labels.append(label_map[action])
 
 X = np.array(sequences)
+print(len(X))
 y = to_categorical(labels).astype(int)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
@@ -44,7 +45,7 @@ log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential() # 30 frame, 1662 length .npy file
-model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
+model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,132)))
 model.add(LSTM(128, return_sequences=True, activation='relu'))
 model.add(LSTM(64, return_sequences=False, activation='relu'))
 model.add(Dense(64, activation='relu'))
@@ -54,7 +55,7 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 # train
-model.fit(X_train, y_train, epochs=2000, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=100, callbacks=[tb_callback])
 
 model.summary()
 
