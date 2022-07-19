@@ -60,7 +60,7 @@ def DrawSkeleton(image, landmark_pose):
   RIGHT_KNEE = landmark_pose[26]
   RIGHT_KNEE_X = int(RIGHT_KNEE.x * image_width)
   RIGHT_KNEE_Y = int(RIGHT_KNEE.y * image_height)
-
+  print(LEFT_HIP)
   LEFT_KNEE = landmark_pose[25]
   LEFT_KNEE_X = int(LEFT_KNEE.x * image_width)
   LEFT_KNEE_Y = int(LEFT_KNEE.y * image_height)
@@ -97,7 +97,7 @@ def DrawSkeleton(image, landmark_pose):
   cv2.line(image, (LEFT_KNEE_X , LEFT_KNEE_Y) , (LEFT_ANKEL_X, LEFT_ANKEL_Y), (0,255,255), 3, cv2.LINE_AA)
   cv2.line(image, (RIGHT_HIP_X , RIGHT_HIP_Y) , (LEFT_HIP_X, LEFT_HIP_Y), (0,255,255), 3, cv2.LINE_AA)
   cv2.line(image, (CENTER_HIP_X , CENTER_HIP_Y) , (CENTER_SHOULDER_X, CENTER_SHOULDER_Y), (0,255,255), 3, cv2.LINE_AA)
-  
+
   return image
 
 def CalculateXMaxMinYMaxMin():
@@ -151,10 +151,9 @@ def main(VIDEO_PATH):
         motionhistory = np.uint8(np.clip((motion_history - (timestamp - MHI_DURATION)) / MHI_DURATION, 0, 1) * 255)
         cv2.imshow('motionhistory', cv2.flip(motion_history,1))
         im_color = cv2.applyColorMap(motionhistory, cv2.COLORMAP_JET)
-
-        # cv2.imshow('motion-history', cv2.flip(im_color,1))
+        cv2.imshow('motion-history', cv2.flip(im_color,1))
         
-        prev_frame = frame.copy()
+        prev_frame = image.copy()
       # cv2.imshow('Skeleton MHI', cv2.flip(image, 1))
       if cv2.waitKey(1) & 0xFF == ord('q'):
         break

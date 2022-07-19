@@ -24,7 +24,7 @@ def draw_styled_landmarks(image, results):
                              ) 
 
 def extract_keypoints(results):
-    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(33*4)
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten() if results.pose_world_landmarks else np.zeros(33*4)
     return pose
 
 
@@ -34,18 +34,9 @@ DATA_PATH = os.path.join('Data')
 # Actions that we try to detect
 actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
 
-# Thirty videos worth of data
-no_sequences = 30
 
 # Videos are going to be 30 frames in length
 sequence_length = 30
-
-for action in actions: 
-    for sequence in range(no_sequences):
-        try: 
-            os.makedirs(os.path.join(DATA_PATH, action, str(sequence)))
-        except:
-            pass
 
 path = '/Users/chaesiheon/Library/CloudStorage/OneDrive-성균관대학교/video_dataset' 
 
@@ -58,8 +49,13 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
         # Loop through sequences aka videos
         path2=path+'/'+action
         file_list = os.listdir(path2) 
+        no_sequences=len(file_list)
         for sequence in range(no_sequences):
-            cap=cv2.VideoCapture(path2+'/'+file_list[sequence])
+            try: 
+                os.makedirs(os.path.join(DATA_PATH, action, str(sequence).zfill(4)))
+            except:
+                pass
+            cap=cv2.VideoCapture(path2+'/'+file_list[sequence].zfill(4))
             # Loop through video length aka sequence length
             for frame_num in range(sequence_length):
 
@@ -68,7 +64,6 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
                 # Make detections
                 image, results = mediapipe_detection(frame, holistic)
-#                 print(results)
 
                 # Draw landmarks
                 draw_styled_landmarks(image, results)
@@ -90,13 +85,13 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                 
                 # NEW Export keypoints
                 keypoints = extract_keypoints(results)
-                print(keypoints)
-                # npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
-                # np.save(npy_path, keypoints)
+                npy_path = os.path.join(DATA_PATH, action, str(sequence).zfill(4), str(frame_num).zfill(3))
+                np.save(npy_path, keypoints)
 
                 # Break gracefully
                 if cv2.waitKey(10) & 0xFF == ord('q'):
                     break
+            print(action,"------- ("+str(sequence)+"/"+str(no_sequences)+")")
                     
     cap.release()
     cv2.destroyAllWindows()
