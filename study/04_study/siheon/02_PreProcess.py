@@ -15,21 +15,22 @@ DATA_PATH = os.path.join('Data')
 # Actions that we try to detect
 actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
 
-# Thirty videos worth of data
-no_sequences = 30
 
 # Videos are going to be 30 frames in length
 sequence_length = 30
 
 label_map = {label:num for num, label in enumerate(actions)}
-
+path = '/Users/chaesiheon/Library/CloudStorage/OneDrive-성균관대학교/video_dataset' 
 # sequences : x,y data | labels : what is it 
 sequences, labels = [], []
 for action in actions:
+    path2=path+'/'+action
+    file_list = os.listdir(path2) 
+    no_sequences=len(file_list)
     for sequence in range(no_sequences):
         window = []
         for frame_num in range(sequence_length):
-            res = np.load(os.path.join(DATA_PATH, action, str(sequence), "{}.npy".format(frame_num)))
+            res = np.load(os.path.join(DATA_PATH, action, str(sequence).zfill(4), "{}.npy".format(str(frame_num).zfill(3))))
             window.append(res)
         sequences.append(window)
         labels.append(label_map[action])
@@ -54,7 +55,7 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 # train
-model.fit(X_train, y_train, epochs=100, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=40, callbacks=[tb_callback])
 
 model.summary()
 
