@@ -38,12 +38,12 @@ for idx in range(1,MHI_DURATION+1):
   RADIUS.append(int(result))
 RADIUS.reverse()
 
-MHI_DURATION_FIRST = 30
+MHI_DURATION_FIRST = 15
 for result_idx in range(1,MHI_DURATION_FIRST+1):
     ratio = (result_idx-1)/(MHI_DURATION_FIRST-1)
     COLOR.append((0,int(255*ratio), int(255*(1-ratio))))
 
-MHI_DURATION_SECOND = 30
+MHI_DURATION_SECOND = 15
 for result_idx in range(1,MHI_DURATION_SECOND+1):
     ratio = (result_idx-1)/(MHI_DURATION_SECOND-1)
     COLOR.append((int(255*ratio), int(255*(1-ratio)), 0))
@@ -63,7 +63,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_SHOULDER_X = 0
     RIGHT_SHOULDER_Y = 0
   LIST_COORD_RIGHT_SHOULDER.insert(0,(RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y))
-  LIST_COORD_RIGHT_SHOULDER.pop(59)
+  LIST_COORD_RIGHT_SHOULDER.pop(29)
 
   LEFT_SHOULDER = landmark_pose[11]
   LEFT_SHOULDER_X = int(LEFT_SHOULDER.x * image_width)
@@ -72,12 +72,12 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_SHOULDER_X = 0
     LEFT_SHOULDER_Y = 0
   LIST_COORD_LEFT_SHOULDER.insert(0,(LEFT_SHOULDER_X,LEFT_SHOULDER_Y))
-  LIST_COORD_LEFT_SHOULDER.pop(59)
+  LIST_COORD_LEFT_SHOULDER.pop(29)
   
   CENTER_SHOULDER_X = int((RIGHT_SHOULDER_X+LEFT_SHOULDER_X)/2)
   CENTER_SHOULDER_Y = int((RIGHT_SHOULDER_Y+LEFT_SHOULDER_Y)/2)
   LIST_COORD_CENTER_SHOULDER.insert(0,(CENTER_SHOULDER_X,CENTER_SHOULDER_Y))
-  LIST_COORD_CENTER_SHOULDER.pop(59)  
+  LIST_COORD_CENTER_SHOULDER.pop(29)  
 
   RIGHT_ELBOW = landmark_pose[14]
   RIGHT_ELBOW_X = int(RIGHT_ELBOW.x * image_width)
@@ -86,7 +86,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_ELBOW_X = 0
     RIGHT_ELBOW_Y = 0
   LIST_COORD_RIGHT_ELBOW.insert(0,(RIGHT_ELBOW_X,RIGHT_ELBOW_Y))
-  LIST_COORD_RIGHT_ELBOW.pop(59)
+  LIST_COORD_RIGHT_ELBOW.pop(29)
 
   LEFT_ELBOW = landmark_pose[13]
   LEFT_ELBOW_X = int(LEFT_ELBOW.x * image_width)
@@ -95,7 +95,7 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_ELBOW_X = 0
     LEFT_ELBOW_Y = 0
   LIST_COORD_LEFT_ELBOW.insert(0,(LEFT_ELBOW_X,LEFT_ELBOW_Y))
-  LIST_COORD_LEFT_ELBOW.pop(59)
+  LIST_COORD_LEFT_ELBOW.pop(29)
 
   RIGHT_WRIST = landmark_pose[16]
   RIGHT_WRIST_X = int(RIGHT_WRIST.x * image_width)
@@ -104,7 +104,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_WRIST_X = 0
     RIGHT_WRIST_Y = 0
   LIST_COORD_RIGHT_WRIST.insert(0,(RIGHT_WRIST_X,RIGHT_WRIST_Y))
-  LIST_COORD_RIGHT_WRIST.pop(59)
+  LIST_COORD_RIGHT_WRIST.pop(29)
 
   LEFT_WRIST = landmark_pose[15]
   LEFT_WRIST_X = int(LEFT_WRIST.x * image_width)
@@ -113,7 +113,7 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_WRIST_X = 0
     LEFT_WRIST_X = 0
   LIST_COORD_LEFT_WRIST.insert(0,(LEFT_WRIST_X,LEFT_WRIST_Y))
-  LIST_COORD_LEFT_WRIST.pop(59)
+  LIST_COORD_LEFT_WRIST.pop(29)
   
   RIGHT_HIP = landmark_pose[24]
   RIGHT_HIP_X = int(RIGHT_HIP.x * image_width)
@@ -122,7 +122,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_HIP_X = 0
     RIGHT_HIP_Y = 0
   LIST_COORD_RIGHT_HIP.insert(0,(RIGHT_HIP_X,RIGHT_HIP_Y))
-  LIST_COORD_RIGHT_HIP.pop(59)
+  LIST_COORD_RIGHT_HIP.pop(29)
   
   LEFT_HIP = landmark_pose[23]
   LEFT_HIP_X = int(LEFT_HIP.x * image_width)
@@ -131,12 +131,12 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_HIP_X = 0
     LEFT_HIP_Y = 0
   LIST_COORD_LEFT_HIP.insert(0,(LEFT_HIP_X,LEFT_HIP_Y))
-  LIST_COORD_LEFT_HIP.pop(59)
+  LIST_COORD_LEFT_HIP.pop(29)
 
   CENTER_HIP_X = int((RIGHT_HIP_X+LEFT_HIP_X)/2)
   CENTER_HIP_Y = int((RIGHT_HIP_Y+LEFT_HIP_Y)/2) 
   LIST_COORD_CENTER_HIP.insert(0,(CENTER_HIP_X,CENTER_HIP_Y))
-  LIST_COORD_CENTER_HIP.pop(59)
+  LIST_COORD_CENTER_HIP.pop(29)
 
   RIGHT_KNEE = landmark_pose[26]
   RIGHT_KNEE_X = int(RIGHT_KNEE.x * image_width)
@@ -145,7 +145,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_KNEE_X = 0
     RIGHT_KNEE_Y = 0
   LIST_COORD_RIGHT_KNEE.insert(0,(RIGHT_KNEE_X,RIGHT_KNEE_Y))
-  LIST_COORD_RIGHT_KNEE.pop(59)
+  LIST_COORD_RIGHT_KNEE.pop(29)
   
   LEFT_KNEE = landmark_pose[25]
   LEFT_KNEE_X = int(LEFT_KNEE.x * image_width)
@@ -154,7 +154,7 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_KNEE_X = 0
     LEFT_KNEE_Y = 0
   LIST_COORD_LEFT_KNEE.insert(0,(LEFT_KNEE_X,LEFT_KNEE_Y))
-  LIST_COORD_LEFT_KNEE.pop(59)
+  LIST_COORD_LEFT_KNEE.pop(29)
 
   RIGHT_ANKLE = landmark_pose[28]
   RIGHT_ANKLE_X = int(RIGHT_ANKLE.x * image_width)
@@ -163,7 +163,7 @@ def InsertCoordinate(image,landmark_pose):
     RIGHT_ANKLE_X = 0
     RIGHT_ANKLE_Y = 0
   LIST_COORD_RIGHT_ANKLE.insert(0,(RIGHT_ANKLE_X,RIGHT_ANKLE_Y))
-  LIST_COORD_RIGHT_ANKLE.pop(59)
+  LIST_COORD_RIGHT_ANKLE.pop(29)
   
   LEFT_ANKLE = landmark_pose[27]
   LEFT_ANKLE_X = int(LEFT_ANKLE.x * image_width)
@@ -172,7 +172,7 @@ def InsertCoordinate(image,landmark_pose):
     LEFT_ANKLE_X = 0
     LEFT_ANKLE_Y = 0 
   LIST_COORD_LEFT_ANKLE.insert(0,(LEFT_ANKLE_X,LEFT_ANKLE_Y))
-  LIST_COORD_LEFT_ANKLE.pop(59)
+  LIST_COORD_LEFT_ANKLE.pop(29)
 
   
   if (LIST_COORD_RIGHT_SHOULDER[0][0]!=0 and LIST_COORD_RIGHT_ELBOW[0][0]!=0):
