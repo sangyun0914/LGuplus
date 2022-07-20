@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import copy
-import pandas as pd
 import os
 
 mp_drawing = mp.solutions.drawing_utils
@@ -30,7 +29,7 @@ def extractPose(video_path, video_name, csv_path):
             success, image = cap.read()
             if not success:
                 print("Action : {0} / filename : {1} / Skeleton Extraction Finished".format(
-                    csv_path, video_name))
+                    csv_path[:-4], video_name))
                 break
 
             # 미디어파이프를 이용하여 스켈레톤 추출
@@ -47,6 +46,7 @@ def extractPose(video_path, video_name, csv_path):
 
     # 첫번째 열은 아무 의미 없는 값이 들어가있기 때문에 지워줌
     extract = np.delete(extract, (0), axis=0)
+    extract = extract.astype(np.float32)
 
     # 30 프레임에서 추출한 관절 정보들을 하나의 csv 파일로 저장
     # 소수 다섯번째 자리까지만 저장
