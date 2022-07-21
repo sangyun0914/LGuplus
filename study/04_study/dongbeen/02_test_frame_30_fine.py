@@ -34,8 +34,8 @@ COLOR = []
 RADIUS = []
 for idx in range(1,MHI_DURATION+1):
   ratio = (idx-1)/(MHI_DURATION-1)
-  result = 5*ratio
-  result += 3
+  result = 4*ratio
+  result += 2
   RADIUS.append(int(result))
 RADIUS.reverse()
 
@@ -341,7 +341,7 @@ feature_extract = True
 model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
 
 #model = models.resnet18() # 기본 가중치를 불러오지 않으므로 pretrained=True를 지정하지 않습니다.
-model_ft.load_state_dict(torch.load('model_weights_v0_2_0.pth'))
+model_ft.load_state_dict(torch.load('model_weights_v0_0.pth', map_location=device))
 model_ft.eval()
 
 mp_drawing = mp.solutions.drawing_utils
@@ -352,7 +352,7 @@ mp_pose = mp.solutions.pose
 class_names = ['lunge', 'squat', 'stand']
 
 with torch.no_grad():
-  cap = cv2.VideoCapture(0)
+  cap = cv2.VideoCapture('202207201352_original.avi')
 
   with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
     while (cap.isOpened()):
@@ -366,7 +366,7 @@ with torch.no_grad():
       transform = transforms.ToTensor()
 
       frame_process = frame.copy()
-      # frame_process = cv2.resize(frame_process, (160,160)) # 400,500으로 변환
+      #frame_process = cv2.resize(frame_process, (260,260)) # 400,500으로 변환
       frame_process = cv2.resize(frame_process, None, fx=0.25 , fy=0.25) #0.5배로 축소
       image_height, image_width, _ = frame_process.shape
 
@@ -385,12 +385,14 @@ with torch.no_grad():
         tensor_img = transform(frame_process)
         tensor_img = tensor_img.unsqueeze(0)
 
-        outputs = model(tensor_img)
-        first , predicted = torch.max(outputs.data, 1)
+        outputs = model_ft(tensor_img)
+        #print(type(tensor_img))
+        first , predicted = torch.max(outputs, 1)
         print(predicted)
         print(class_names[predicted])
+        cv2.putText(frame_process, class_names[predicted], (10,50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
-        action = None
+        '''action = None
         if (predicted == 0):
           action = "lunge"
         elif (predicted == 1):
@@ -400,10 +402,11 @@ with torch.no_grad():
 
         if (first > 0.5):
           print("action : {}, prob : {}".format(action,first))
-          cv2.putText(frame, str(predicted), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
+          cv2.putText(frame, str(predicted), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)'''
 
         frame_process = cv2.resize(frame_process,None,fx=4,fy=4)
-        cv2.imshow('skeletonMHI', cv2.flip(frame_process,1))
+        #cv2.imshow('skeletonMHI', cv2.flip(frame_process,1))
+        cv2.imshow('skeletonMHI', frame_process)
       if (cv2.waitKey(10) & 0xFF == ord('q')):
         break
 
