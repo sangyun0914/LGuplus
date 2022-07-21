@@ -41,6 +41,7 @@ with mp_pose.Pose(
         new_Y = (world_landmark.landmark._values[joint].y + 1) / 2
         normalized_landmark_arr.append((new_X, new_Y))
         cv2.circle(
+            
             blank_image, 
             (int(new_X * image_width), 
             int(new_Y * image_height)), 
