@@ -2,7 +2,10 @@ import os
 import numpy as np
 
 # 운동 종류 지정
-actions = ['squatdown', 'squatup']
+"""actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up']"""
+
+actions = ['squat-down', 'squat-up', 'lunge-down', 'lunge-up']
 
 
 def makelabel(action):
@@ -24,7 +27,8 @@ def main():
             file = np.concatenate([file, makelabel(action)])
             dataset = np.append(dataset, [file], axis=0)
     dataset = np.delete(dataset, (0), axis=0)
-    # print(dataset.shape)
+    print(actions)
+    print(dataset.shape)
     np.savetxt('mydataset.csv', dataset, delimiter=",", fmt='%.5f')
 
 
