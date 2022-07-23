@@ -75,15 +75,23 @@ def imshow_tensor(image, ax=None, title=None):
 
     return ax, image
 
-save_file_name = DIR + '/resnet50-transfer.pt'
-checkpoint_path = DIR + '/resnet50-transfer.pth'
+save_file_name = DIR + '/models/resnet50-cuda-v2.pt'
+checkpoint_path = DIR + '/models/resnet50-cuda-v2.pth'
 
-# Change to fit hardware
-batch_size = 32
+### Whether to load on a GPU
+if torch.cuda.is_available():
+    load_on_gpu = True
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    load_on_gpu = True
+    device = torch.device("mps")
 
-# Whether to train on a gpu
-gpu = cuda.is_available()
-print(f'Train on gpu: {gpu}')
+### Load on CPU, remove if load GPU
+load_on_gpu = False 
+device = torch.device("cpu")
+
+
+print(f'Device: {device}')
 
 # Image transformations
 image_transforms = {
@@ -129,7 +137,7 @@ def load_checkpoint(path):
 
     """
     # Load in checkpoint
-    checkpoint = torch.load(path, map_location=torch.device('cpu'))
+    checkpoint = torch.load(path, map_location=device)
 
     model = models.resnet50(pretrained=True)
     # Make sure to set parameters as not trainable
@@ -139,7 +147,7 @@ def load_checkpoint(path):
 
     # Load in the state dict
     #model.load_state_dict(checkpoint['state_dict'])
-    model.load_state_dict(torch.load(save_file_name, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(save_file_name, map_location=device))
 
     total_params = sum(p.numel() for p in model.parameters())
     print(f'{total_params:,} total parameters.')
@@ -149,8 +157,8 @@ def load_checkpoint(path):
 
     print()
 
-    if gpu:
-        model = model.to('cuda')
+    if load_on_gpu:
+        model = model.to(device)
 
     # Model basics
     model.class_to_idx = checkpoint['class_to_idx']
@@ -216,8 +224,8 @@ def predict(image_path, model, topk=5):
     img_tensor = process_image(image_path)
 
     # Resize
-    if gpu:
-        img_tensor = img_tensor.view(1, 3, 224, 224).cuda()
+    if load_on_gpu:
+        img_tensor = img_tensor.view(1, 3, 224, 224).to(device)
     else:
         img_tensor = img_tensor.view(1, 3, 224, 224)
 

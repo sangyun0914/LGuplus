@@ -1,6 +1,7 @@
 import os
 
-actions = ['squatdown', 'squatup']
+actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up']
 
 cnt = 0
 

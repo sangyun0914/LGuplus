@@ -9,7 +9,8 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 # 운동 종류 지정
-actions = ['squatdown', 'squatup']
+actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up']
 
 # video_path : 스켈레톤을 추출하려고 하는 비디오의 경로
 # video_name : 비디오의 파일 이름, csv파일 이름을 비디오 이름과 통일해주기 위해서 필요함
