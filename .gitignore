@@ -24,3 +24,5 @@ main_project/lstm/pushup-down/*
 main_project/lstm/pushup-up/*
 main_project/lstm/lunge-down/*
 main_project/lstm/lunge-up/*
+main_project/MHI/data
+main_project/MHI/models
