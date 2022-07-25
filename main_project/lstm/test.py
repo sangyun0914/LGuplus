@@ -8,7 +8,7 @@ import time
 
 mp_pose = mp.solutions.pose
 
-actions = ['squatdown', 'squatup']
+actions = ['squat-down', 'squat-up', 'lunge-down', 'lunge-up']
 
 video = '/Users/jaejoon/LGuplus/main_project/lstm/squatdown/01-202207081454-1-20.avi'
 
@@ -17,14 +17,20 @@ class Model(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, layers):
         super(Model, self).__init__()
         self.lstm = nn.LSTM(input_dim, hidden_dim,
-                            num_layers=layers, batch_first=True, bias=True)
-        self.fc = nn.Linear(hidden_dim, output_dim, bias=True)
+                            num_layers=layers, batch_first=True, bias=True, dropout=0.3, bidirectional=False)
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim, bias=True)
+        self.fc3 = nn.Linear(hidden_dim, output_dim, bias=True)
+        self.silu = nn.SiLU()
+        self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = x.view([-1, 30, 88])
         x, _status = self.lstm(x)
-        x = self.fc(x[:, -1])
+        x = self.relu(self.fc1(x[:, -1]))
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
         x = self.softmax(x)
         return x
 
@@ -65,7 +71,7 @@ def extractPose(video_path):
 
 def initModel():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = torch.load('./model/model_mk0.pt', map_location=device)
+    model = torch.load('./model/model_mk1.pt', map_location=device)
     print(model)
     return model
 

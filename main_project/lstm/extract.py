@@ -51,7 +51,7 @@ def extractPose(video_path, video_name, csv_path):
 
     # 30 프레임에서 추출한 관절 정보들을 하나의 csv 파일로 저장
     # 소수 다섯번째 자리까지만 저장
-    np.savetxt('./{0}/{1}.csv'.format(csv_path, video_name),
+    np.savetxt('./csv/{0}/{1}.csv'.format(csv_path, video_name),
                extract, delimiter=",", fmt='%.5f')
     cap.release()
 
@@ -59,8 +59,8 @@ def extractPose(video_path, video_name, csv_path):
 def main():
     # 지정한 운동들을 스켈레톤 추출하여 저장
     for action in actions:
-        for filename in os.listdir("./{0}".format(action)):
-            extractPose(os.path.join("./{0}".format(action), filename),
+        for filename in os.listdir("./videos/{0}".format(action)):
+            extractPose(os.path.join("./videos/{0}".format(action), filename),
                         filename, '{0}_csv'.format(action))
 
 

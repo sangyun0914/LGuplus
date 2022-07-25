@@ -18,9 +18,12 @@ def makelabel(action):
 def main():
     dataset = np.empty((1, 2640 + len(actions)))
     for action in actions:
-        for filename in os.listdir("./{0}_csv".format(action)):
+        for filename in os.listdir("./videos/{0}_csv".format(action)):
+            print(filename)
+            if filename.endswith('.DS_Store'):
+                continue
             file = np.loadtxt(os.path.join(
-                "./{0}_csv".format(action), filename), delimiter=",", dtype=np.float32)
+                "./csv/{0}_csv".format(action), filename), delimiter=",", dtype=np.float32)
             # 30 프레임의 데이터를 하나로 펼침
             file = file.flatten()
             # 데이터 마지막에 라벨링 추가

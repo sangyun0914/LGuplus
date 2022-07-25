@@ -6,13 +6,15 @@ from torch.utils.data import DataLoader
 import numpy as np
 import time
 
+actions = ['squat-down', 'squat-up', 'lunge-down', 'lunge-up']
+
 seq_length = 30  # 30 프레임
 data_dim = 88  # 22개의 랜드마크, 랜드마크의 x, y, z, visibility
-hidden_dim = 40
-output_dim = 6  # 운동 종류
+hidden_dim = 20
+output_dim = len(actions)  # 운동 종류
 lstm_layers = 2
 learning_rate = 0.0005
-epochs = 1000
+epochs = 500
 batch_size = 32
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -45,6 +47,7 @@ class Model(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, hidden_dim, bias=True)
         self.fc3 = nn.Linear(hidden_dim, output_dim, bias=True)
         self.silu = nn.SiLU()
+        self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
@@ -96,5 +99,5 @@ if __name__ == '__main__':
     m, s = divmod(time.time() - since, 60)
     print(f'Total Time: {m:.0f}m {s:.0f}s\nModel was trained on {device}!')
 
-    torch.save(model, './model/model_mk1.pt')
+    torch.save(model, './model/model_mk2.pt')
     print('Model Saved!')
