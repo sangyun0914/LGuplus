@@ -5,7 +5,7 @@ import numpy as np
 """actions = ['squat-down', 'squat-up', 'pushup-down',
            'pushup-up', 'lunge-down', 'lunge-up']"""
 
-actions = ['squat-down', 'squat-up', 'lunge-down', 'lunge-up']
+actions = ['pushup-down', 'pushup-up']
 
 
 def makelabel(action):
@@ -18,7 +18,7 @@ def makelabel(action):
 def main():
     dataset = np.empty((1, 2640 + len(actions)))
     for action in actions:
-        for filename in os.listdir("./videos/{0}_csv".format(action)):
+        for filename in os.listdir("./csv/{0}_csv".format(action)):
             print(filename)
             if filename.endswith('.DS_Store'):
                 continue

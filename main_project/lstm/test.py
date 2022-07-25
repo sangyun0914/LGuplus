@@ -8,9 +8,9 @@ import time
 
 mp_pose = mp.solutions.pose
 
-actions = ['squat-down', 'squat-up', 'lunge-down', 'lunge-up']
+actions = ['pushup-down', 'pushup-up']
 
-video = '/Users/jaejoon/LGuplus/main_project/lstm/squatdown/01-202207081454-1-20.avi'
+# video = '/Users/jaejoon/LGuplus/main_project/lstm/squatdown/01-202207081454-1-20.avi'
 
 
 class Model(nn.Module):
@@ -71,7 +71,7 @@ def extractPose(video_path):
 
 def initModel():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = torch.load('./model/model_mk1.pt', map_location=device)
+    model = torch.load('./model/model_mk3.pt', map_location=device)
     print(model)
     return model
 
@@ -89,9 +89,10 @@ def testModel(model, test_data):
 
 
 def main():
-    test_data = extractPose(video)
-    model = initModel()
-    testModel(model, test_data)
+    # test_data = extractPose(video)
+    # model = initModel()
+    # testModel(model, test_data)
+    return 0
 
 
 if __name__ == '__main__':

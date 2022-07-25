@@ -60,6 +60,8 @@ def main():
     # 지정한 운동들을 스켈레톤 추출하여 저장
     for action in actions:
         for filename in os.listdir("./videos/{0}".format(action)):
+            if filename.endswith('.DS_Store'):
+                continue
             extractPose(os.path.join("./videos/{0}".format(action), filename),
                         filename, '{0}_csv'.format(action))
 
