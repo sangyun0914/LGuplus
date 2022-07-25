@@ -1,9 +1,9 @@
 # Training ResNet for MHI dataset
-# Code based on cuda GPU
+# Code based for cuda GPU, apple silicon GPU, CPU
 # Trained dataset on 2022/07/22
 
 import os
-from collections import Counter
+import pathlib
 from timeit import default_timer as timer
 
 import matplotlib.pyplot as plt
@@ -11,37 +11,50 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from PIL import Image
 from torch import cuda, optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 
 # Set data directories
-traindir = f"data/train"
-validdir = f"data/val"
-testdir = f"data/test"
 
-save_file_name = f'resnet50-transfer.pt'
-checkpoint_path = f'resnet50-transfer.pth'
+DIR = str(pathlib.Path(__file__).parent.resolve())
+traindir = f"{DIR}/data/train"
+validdir = f"{DIR}/data/val"
+testdir = f"{DIR}/data/test"
+
+save_file_name = f'{DIR}/models/resnet50-cuda-v1.pt'
+checkpoint_path = f'{DIR}/models/resnet50-cuda-v1.pth'
 
 # Change to fit hardware
 batch_size = 32
+gpu_count = 0
 
-# Whether to train on a gpu
-train_on_gpu = cuda.is_available()
-multi_gpu = False
-print(f'Train on gpu: {train_on_gpu}')
+### Choose hardware to train model, remove other
+
+# Train on GPU
+if torch.cuda.is_available():
+    train_on_gpu = True
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    train_on_gpu = True
+    device = torch.device("mps")
+
+# Train on CPU
+device = 'cpu' 
+train_on_gpu = False  
+
+print(f'Device: {device}')
 
 # Number of gpus
-if train_on_gpu:
+if torch.cuda.is_available():
     gpu_count = cuda.device_count()
-    print(f'{gpu_count} gpus detected.')
-    if gpu_count > 1:
-        multi_gpu = True
-    else:
-        multi_gpu = False
-print(train_on_gpu,multi_gpu)
+elif torch.backends.mps.is_available():
+    gpu_count = 1
 
+if gpu_count > 1:
+    multi_gpu = True
+else:
+    multi_gpu = False
 
 def imshow_tensor(image, ax=None, title=None):
     """Imshow for Tensor."""
@@ -125,7 +138,7 @@ for d in os.listdir(traindir):
 n_classes = len(categories)
 print(f'There are {n_classes} different classes: {categories}')
 
-model = models.resnet50(pretrained=True)
+model = models.resnet50(weights='ResNet50_Weights.DEFAULT')
 
 # Freeze model weights
 for param in model.parameters():
@@ -150,7 +163,7 @@ total_trainable_params = sum(
 print(f'{total_trainable_params:,} training parameters.')
 
 if train_on_gpu:
-    model = model.to('cuda')
+    model = model.to(device)
 
 if multi_gpu:
     model = nn.DataParallel(model)
@@ -233,7 +246,7 @@ def train(model,
         for ii, (data, target) in enumerate(train_loader):
             # Tensors to gpu
             if train_on_gpu:
-                data, target = data.cuda(), target.cuda()
+                data, target = data.to(device), target.to(device)
 
             # Clear gradients
             optimizer.zero_grad()
@@ -276,7 +289,7 @@ def train(model,
                 for data, target in valid_loader:
                     # Tensors to gpu
                     if train_on_gpu:
-                        data, target = data.cuda(), target.cuda()
+                        data, target = data.to(device), target.to(device)
 
                     # Forward pass
                     output = model(data)
@@ -373,7 +386,7 @@ model, history = train(
     dataloaders['train'],
     dataloaders['val'],
     save_file_name=save_file_name,
-    max_epochs_stop=100,
+    max_epochs_stop=3,
     n_epochs=100,
     print_every=1)
 
@@ -409,10 +422,6 @@ def save_checkpoint(model, path):
 
     """
 
-    model_name = path.split('-')[0]
-    assert (model_name in ['vgg16', 'resnet50'
-                           ]), "Path must have the correct model name"
-
     # Basic details
     checkpoint = {
         'class_to_idx': model.class_to_idx,
@@ -420,23 +429,13 @@ def save_checkpoint(model, path):
         'epochs': model.epochs,
     }
 
-    # Extract the final classifier and the state dictionary
-    if model_name == 'vgg16':
-        # Check to see if model was parallelized
-        if multi_gpu:
-            checkpoint['classifier'] = model.module.classifier
-            checkpoint['state_dict'] = model.module.state_dict()
-        else:
-            checkpoint['classifier'] = model.classifier
-            checkpoint['state_dict'] = model.state_dict()
 
-    elif model_name == 'resnet50':
-        if multi_gpu:
-            checkpoint['fc'] = model.module.fc
-            checkpoint['state_dict'] = model.module.state_dict()
-        else:
-            checkpoint['fc'] = model.fc
-            checkpoint['state_dict'] = model.state_dict()
+    if multi_gpu:
+        checkpoint['fc'] = model.module.fc
+        checkpoint['state_dict'] = model.module.state_dict()
+    else:
+        checkpoint['fc'] = model.fc
+        checkpoint['state_dict'] = model.state_dict()
 
     # Add the optimizer
     checkpoint['optimizer'] = model.optimizer
