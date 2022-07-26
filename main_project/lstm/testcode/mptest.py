@@ -4,7 +4,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-video = 0
+video = '/Users/jaejoon/LGuplus/main_project/lstm/testcode/06-202207081458-2-14.avi'
 
 cap = cv2.VideoCapture(video)
 with mp_pose.Pose(
@@ -33,6 +33,10 @@ with mp_pose.Pose(
             results.pose_landmarks,
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
+        mp_drawing.plot_landmarks(
+            results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
+
         # Flip the image horizontally for a selfie-view display.
         cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
 
