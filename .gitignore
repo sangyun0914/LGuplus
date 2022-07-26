@@ -16,5 +16,6 @@ main_project/lstm/videos/*
 main_project/lstm/csv/*
 main_project/lstm/videos_rotate90/*
 main_project/lstm/videos_rotate270/*
+main_project/lstm/csv_extra/*
 main_project/MHI/data
 main_project/MHI/models
