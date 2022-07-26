@@ -5,7 +5,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-video = '/Users/jaejoon/LGuplus/main_project/lstm/videos/pushup-down/03-202207141527-0-20-0.avi'
+video = '/Users/jaejoon/LGuplus/main_project/lstm/videos/pushup-down/03-202207141522-4-20-0.avi'
 
 cap = cv2.VideoCapture(video)
 with mp_pose.Pose(
@@ -23,10 +23,6 @@ with mp_pose.Pose(
         image.flags.writeable = False
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image)
-
-        landmarks = np.array(results.pose_world_landmarks.landmark)
-
-        print(results.pose_world_landmarks.landmark)
 
         # Draw the pose annotation on the image.
         image.flags.writeable = True

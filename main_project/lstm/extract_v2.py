@@ -47,6 +47,7 @@ def extractPose(video_path, video_name, csv_path):
             temp = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten(
             ) if results.pose_world_landmarks else np.zeros(132)
 
+            # print(video_name)
             angles = extraFeatures.extractAngles(results)
 
             # 얼굴을 제외한 22개의 랜드마크만 사용하기 위해 temp의 0~43번 인덱스 내용은 버림

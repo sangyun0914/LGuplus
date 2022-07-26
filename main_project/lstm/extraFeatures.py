@@ -23,6 +23,8 @@ def landmark2nparray(landmark):
 # input : mediapipe의 pose.process()의 results
 # output : 8개의 관절 사이 각도로 이루어진 1차원 넘파이 배열 (8,)
 def extractAngles(results):
+    if not results.pose_world_landmarks:
+        return np.zeros(8)
     temp = np.array(results.pose_world_landmarks.landmark)
     landmarks = np.array([landmark2nparray(x) for x in temp])
     out = getAngle(landmarks, 13, 11, 15)
