@@ -10,11 +10,12 @@ mp_pose = mp.solutions.pose
 
 extract = np.empty((1, 88))
 
-video1 = '/Users/jaejoon/LGuplus/main_project/lstm/testcode/06-202207081458-2-14.avi'
-video2 = '/Users/jaejoon/LGuplus/main_project/lstm/testcode/rotate.avi'
+video1 = '/Users/jaejoon/LGuplus/main_project/lstm/videos/lunge-down/05-202207141513-0-20-0.avi'
+video2 = '/Users/jaejoon/LGuplus/main_project/lstm/videos_rotate90/lunge-down/05-202207141513-0-20-0.avi'
+video3 = '/Users/jaejoon/LGuplus/main_project/lstm/videos_rotate270/lunge-down/05-202207141513-0-20-0.avi'
 
 # 비디오 캡쳐 시작
-cap = cv2.VideoCapture(video2)
+cap = cv2.VideoCapture(video3)
 with mp_pose.Pose(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as pose:
@@ -40,5 +41,5 @@ extract = extract.astype(np.float32)
 
 # 30 프레임에서 추출한 관절 정보들을 하나의 csv 파일로 저장
 # 소수 다섯번째 자리까지만 저장
-np.savetxt('./2.csv', extract, delimiter=",", fmt='%.5f')
+np.savetxt('./video3.csv', extract, delimiter=",", fmt='%.5f')
 cap.release()

@@ -15,5 +15,6 @@ study/04_study/sangyun/video
 main_project/lstm/videos/*
 main_project/lstm/csv/*
 main_project/lstm/videos_rotate90/*
+main_project/lstm/videos_rotate270/*
 main_project/MHI/data
 main_project/MHI/models
