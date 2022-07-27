@@ -55,7 +55,7 @@ for action in actions:
             if (frame_num == 0):
                 print('STARTING COLLECTION for {} (video number {}) wait...'.format(
                     action, sequence))
-                cv2.waitKey(0)
+                cv2.waitKey(1000)
 
             ret, frame = cap.read()
             show_frame = frame.copy()

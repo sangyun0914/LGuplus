@@ -28,3 +28,5 @@ main_project/lstm/lunge-down/*
 main_project/lstm/lunge-up/*
 main_project/MHI/data
 main_project/MHI/models
+sub_project/SkeletonMHIObjectDetection/model/*
+sub_project/SkeletonMHIObjectDetection/video/*

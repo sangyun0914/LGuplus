@@ -37,7 +37,7 @@ def extractPose(video_path, video_name, csv_path):
             image.flags.writeable = False
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             results = pose.process(image)
-
+ 
             temp = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten(
             ) if results.pose_world_landmarks else np.zeros(132)
 
