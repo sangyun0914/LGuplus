@@ -27,13 +27,13 @@ def extractAngles(results):
         return np.zeros(8)
     temp = np.array(results.pose_world_landmarks.landmark)
     landmarks = np.array([landmark2nparray(x) for x in temp])
-    out = getAngle(landmarks, 13, 11, 15)
-    out = np.append(out, getAngle(landmarks, 14, 12, 16))
-    out = np.append(out, getAngle(landmarks, 11, 13, 23))
-    out = np.append(out, getAngle(landmarks, 12, 14, 24))
-    out = np.append(out, getAngle(landmarks, 23, 11, 25))
-    out = np.append(out, getAngle(landmarks, 24, 12, 26))
-    out = np.append(out, getAngle(landmarks, 25, 23, 27))
-    out = np.append(out, getAngle(landmarks, 26, 24, 28))
+    out = getAngle(landmarks, 13, 11, 15)  # 왼쪽 팔꿈치 관절
+    out = np.append(out, getAngle(landmarks, 14, 12, 16))  # 오른쪽 팔꿈치 관절
+    out = np.append(out, getAngle(landmarks, 11, 13, 23))  # 왼쪽 어깨 관절
+    out = np.append(out, getAngle(landmarks, 12, 14, 24))  # 오른쪽 어깨 관절
+    out = np.append(out, getAngle(landmarks, 23, 11, 25))  # 왼쪽 고관절
+    out = np.append(out, getAngle(landmarks, 24, 12, 26))  # 오른쪽 고관절
+    out = np.append(out, getAngle(landmarks, 25, 23, 27))  # 왼쪽 무릎 관절
+    out = np.append(out, getAngle(landmarks, 26, 24, 28))  # 오른쪽 무릎 관절
     # print(out.shape)
     return out
