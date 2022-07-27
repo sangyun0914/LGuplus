@@ -2,6 +2,7 @@
 *.DS_Store
 *.weights
 *.mp4
+*.csv
 !study/02_study/video/videoplayback.mp4
 study/02_study/pre-study-junSeong/PennFudanPed
 *.vscode
@@ -19,3 +20,5 @@ main_project/lstm/videos_rotate270/*
 main_project/lstm/csv_extra/*
 main_project/MHI/data
 main_project/MHI/models
+sub_project/SkeletonMHIObjectDetection/model/*
+sub_project/SkeletonMHIObjectDetection/video/*
