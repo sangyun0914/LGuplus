@@ -2,10 +2,8 @@ import os
 import numpy as np
 
 # 운동 종류 지정
-"""actions = ['squat-down', 'squat-up', 'pushup-down',
-           'pushup-up', 'lunge-down', 'lunge-up']"""
-
-actions = ['pushup-down', 'pushup-up']
+actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up']
 
 
 def makelabel(action):

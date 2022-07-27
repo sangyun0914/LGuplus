@@ -6,7 +6,8 @@ from torch.utils.data import DataLoader
 import numpy as np
 import time
 
-actions = ['pushup-down', 'pushup-up']
+actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up']
 
 seq_length = 30  # 30 프레임
 data_dim = 88  # 22개의 랜드마크, 랜드마크의 x, y, z, visibility
@@ -24,6 +25,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 class MyDataset(Dataset):
     def __init__(self):
         data = np.loadtxt('mydataset.csv', delimiter=",", dtype=np.float32)
+        print(data.shape)
         self.len = data.shape[0]
         self.x_data = torch.from_numpy(data[:, 0:-output_dim])
         self.y_data = torch.from_numpy(data[:, -output_dim:])
@@ -57,7 +59,7 @@ class Model(nn.Module):
         x = self.silu(self.fc1(x[:, -1]))
         x = self.silu(self.fc2(x))
         x = self.fc3(x)
-        x = self.softmax(x)
+        # x = self.softmax(x)
         return x
 
 

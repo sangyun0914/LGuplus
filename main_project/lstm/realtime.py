@@ -10,6 +10,9 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
+seq_length = 30  # 20 프레임
+data_dim = 88  # 22개의 랜드마크, 랜드마크의 x, y, z, visibility
+
 
 class Model(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, layers):
@@ -24,12 +27,12 @@ class Model(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = x.view([-1, 30, 88])
+        x = x.view([-1, seq_length, data_dim])
         x, _status = self.lstm(x)
-        x = self.relu(self.fc1(x[:, -1]))
-        x = self.relu(self.fc2(x))
+        x = self.silu(self.fc1(x[:, -1]))
+        x = self.silu(self.fc2(x))
         x = self.fc3(x)
-        x = self.softmax(x)
+        # x = self.softmax(x)
         return x
 
 
@@ -64,19 +67,22 @@ with mp_pose.Pose(
         ) if results.pose_world_landmarks else np.zeros(132)
 
         # 얼굴을 제외한 22개의 랜드마크만 사용하기 위해 0~43번 인덱스 내용은 버림
-        temp2 = copy.deepcopy(temp[44:])
-
+        temp2 = temp[44:]
         extract = np.append(extract, [temp2], axis=0)
         extract = extract.astype(np.float32)
 
         image = cv2.flip(image, 1)
 
-        if(extract.shape[0] > 30):
+        if(extract.shape[0] > seq_length):
             extract = np.delete(extract, (0), axis=0)
+            # print(extract.shape)
             font = cv2.FONT_HERSHEY_SIMPLEX
-            action = test.testModel(model, torch.Tensor(extract))
+            prob, action = test.testModel(model, torch.Tensor(extract))
+            prob = prob.item()
             cv2.putText(image, action, (50, 100),
-                        font, 3, (255, 0, 0), 2)
+                        font, 2, (255, 0, 0), 2)
+            cv2.putText(image, str(prob), (50, 300),
+                        font, 2, (255, 0, 0), 2)
 
         cv2.imshow('MediaPipe Pose', image)
 

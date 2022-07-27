@@ -565,7 +565,7 @@ def StartEngine(cap):
           mp_pose.POSE_CONNECTIONS,
           landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
         
-        cv2.putText(image, "{}/100".format(str(frame_count)) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        cv2.putText(image_copy, "{}/100".format(str(frame_count)) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
         cv2.imshow('Wake up',image_copy)
         cv2.waitKey(1)
         if (frame_count == 50):
@@ -583,7 +583,7 @@ actionList = [("stand",5),("stand",5),("stand",5)]
 cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture(0)
 # wake up
-
+StartEngine(cap)
 # detection
 with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
   previous = "stand"
@@ -594,118 +594,114 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
       frame_count += 1
       image_height, image_width, _ = frame.shape
 
+      cv2.imshow('Original',frame)
+
       frame.flags.writeable = False
       frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
       results = pose.process(frame)
-
+    
       frame.flags.writeable = True
       if results.pose_landmarks:
         landmark_pose = results.pose_landmarks.landmark
 
         frame = InsertCoordinate(frame,landmark_pose)
+        frame = cv2.resize(frame, None, fx=0.25 , fy=0.25) #0.5배로 축소
+        results_yolo = model(frame)
 
-        frame = cv2.resize(frame, None, fx=0.5 , fy=0.5) #0.5배로 축소
-        if (frame_count == 3):
-          frame_count=0
-          results_yolo = model(frame)
+        labels, cord = results_yolo.xyxyn[0][:, -1], results_yolo.xyxyn[0][:, :-1]
+        n = len(labels)
 
-          labels, cord = results_yolo.xyxyn[0][:, -1], results_yolo.xyxyn[0][:, :-1]
-          n = len(labels)
+        x_shape, y_shape = frame.shape[1], frame.shape[0]
 
-          x_shape, y_shape = frame.shape[1], frame.shape[0]
+        squat, stand, lunge, lying, pushup = 0,0,0,0,0
+        SQUAT, STAND, LUNGE, LYING, PUSHUP = 15,19,16,17,18
 
-          squat, stand, lunge, lying, pushup = 0,0,0,0,0
-          SQUAT, STAND, LUNGE, LYING, PUSHUP = 15,19,16,17,18
+        action = "None"
+        dictInfor = {"squat":0, "stand":0, "lunge":0, "lying":0, "pushup":0}
 
-          action = "None"
-          dictInfor = {"squat":0, "stand":0, "lunge":0, "lying":0, "pushup":0}
+        for i in range(n):
+            row = cord[i]
+            if row[4] >= 0.5:
+                
+                x1, y1, x2, y2 = int(row[0]*x_shape), int(row[1]*y_shape), int(row[2]*x_shape), int(row[3]*y_shape)
+                # if (x2-x2 < 30 or y2-y1<30):
+                #   continue
+                # print('width : {} | height : {}'.format(x2-x1,y2-y1))
+                
+                bgr = (0, 255, 0)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
 
-          for i in range(n):
-              row = cord[i]
-              print(labels[i], row[4])
-              if row[4] >= 0.6:
-                  
-                  x1, y1, x2, y2 = int(row[0]*x_shape), int(row[1]*y_shape), int(row[2]*x_shape), int(row[3]*y_shape)
-                  # if (x2-x2 < 30 or y2-y1<30):
-                  #   continue
-                  # print('width : {} | height : {}'.format(x2-x1,y2-y1))
-                  
-                  bgr = (0, 255, 0)
-                  cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
+                if (labels[i] == SQUAT):
+                  dictInfor["squat"] += 1
+                
+                if (labels[i] == STAND):
+                  dictInfor["stand"] += 1
 
-                  if (labels[i] == SQUAT):
-                    dictInfor["squat"] += 1
-                  
-                  if (labels[i] == STAND):
-                    dictInfor["stand"] += 1
+                if (labels[i] == LUNGE):
+                  dictInfor["lunge"] += 1
 
-                  if (labels[i] == LUNGE):
-                    dictInfor["lunge"] += 1
+                if (labels[i] == LYING):
+                  dictInfor["lying"] += 1
 
-                  if (labels[i] == LYING):
-                    dictInfor["lying"] += 1
+                if (labels[i] == PUSHUP):
+                  dictInfor["pushup"] += 1
 
-                  if (labels[i] == PUSHUP):
-                    dictInfor["pushup"] += 1
+        action = max(dictInfor, key = dictInfor.get)
+        
+        # if (action != actionList[0][0]):
+        #   actionList.pop(len(actionList)-1)
+        #   actionList.insert(0,(str(action),int(0)))
 
-          action = max(dictInfor, key = dictInfor.get)
-          
-          if (action != actionList[0][0]):
-            actionList.pop(len(actionList)-1)
-            actionList.insert(0,(str(action),int(0)))
+        # else:
+        #   getAction = str(actionList[0][0])
+        #   getFrameCount = int(actionList[0][1])
+        #   getFrameCount += 1
+        #   actionList.pop(0)
 
-          else:
-            getAction = str(actionList[0][0])
-            getFrameCount = int(actionList[0][1])
-            getFrameCount += 1
-            actionList.pop(0)
+        #   actionList.insert(0,(str(getAction),int(getFrameCount)))
+        
+        # print(actionList)
+        # print(actionList[1][0])
+        # print(actionList[2][0]
 
-            actionList.insert(0,(str(getAction),int(getFrameCount)))
-          
-          # print(actionList)
-          # print(actionList[1][0])
-          # print(actionList[2][0]
+        # try:
+        #   FrameCountIndex1 = int(actionList[1][1])
+        #   if (FrameCountIndex1 < 2):
+        #     actionList.pop(1)
+        # except:
+        #   pass
 
-          # try:
-          #   FrameCountIndex1 = int(actionList[1][1])
-          #   if (FrameCountIndex1 < 2):
-          #     actionList.pop(1)
-          # except:
-          #   pass
+        # try:
+        #   FrameCountIndex2 = int(actionList[2][1])
+        #   if (FrameCountIndex2 < 2):
+        #     actionList.pop(2)
+        # except:
+        #   pass
+        Current = action
+        # print(actionList)
 
-          # try:
-          #   FrameCountIndex2 = int(actionList[2][1])
-          #   if (FrameCountIndex2 < 2):
-          #     actionList.pop(2)
-          # except:
-          #   pass
+        frame = cv2.resize(frame, None, fx=4 , fy=4) #다시 확대
 
-          action = str(actionList[0][0])
-          
-          Current = action
-          print(actionList)
+        doAction = ActionPerformed(previous,Current)
 
-          frame = cv2.resize(frame, None, fx=2 , fy=2) #다시 확대
-
-          doAction = ActionPerformed(previous,Current)
-
-          if (doAction == SQUAT):
-            NumSquat += 1
-          elif (doAction == LUNGE):
-            NumLunge += 1
-          elif (doAction == PUSHUP):
-            NumPushup += 1
-          
-          squat_left,squat_right = EvalulateSquatPose(frame,landmark_pose)
-          dictEval = {"6":"Bad", "5":"Normal", "4":"GOOD"}
-          if (action == "squat"):
-            cv2.putText(frame, "Action : {}".format(str(dictEval[str(squat_right)])+" "+ action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-          else:
-            cv2.putText(frame, "Action : {}".format(action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-          cv2.putText(frame, "Squat: {}".format(str(NumSquat)) , (100,150), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-          cv2.putText(frame, "Lunge: {}".format(str(NumLunge)) , (100,200), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-          cv2.putText(frame, "Pushup: {}".format(str(NumPushup)) , (100,250), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-          previous = Current
+        if (doAction == SQUAT):
+          NumSquat += 1
+        elif (doAction == LUNGE):
+          NumLunge += 1
+        elif (doAction == PUSHUP):
+          NumPushup += 1
+        
+        squat_left,squat_right = EvalulateSquatPose(frame,landmark_pose)
+        dictEval = {"6":"Bad", "5":"Normal", "4":"GOOD"}
+        if (action == "squat"):
+          cv2.putText(frame, "Action : {}".format(str(dictEval[str(squat_right)])+" "+ action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        else:
+          cv2.putText(frame, "Action : {}".format(action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        cv2.putText(frame, "Squat: {}".format(str(NumSquat)) , (100,150), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        cv2.putText(frame, "Lunge: {}".format(str(NumLunge)) , (100,200), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        cv2.putText(frame, "Pushup: {}".format(str(NumPushup)) , (100,250), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        previous = Current
+        
 
       cv2.imshow('skeletonMHI', frame)
 
