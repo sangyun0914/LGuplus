@@ -378,7 +378,7 @@ def show_frames():
 
     prev = cur
     # Repeat after an interval to capture continiously
-    webcam.after(10, show_frames)
+    webcam.after(5, show_frames)
 
 # import model
 MODEL = "ActionV6_rf.pkl"
@@ -389,9 +389,10 @@ BAD, NORMAL, GOOD = 4,5,6
 win = Tk()
 
 cap= cv2.VideoCapture(0)
+# cap = cv2.VideoCapture("video/test.mp4")
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
+# 
 WIDTH_INFOR = 180
 GEOMETRY = str(int(width/2)+2*int(WIDTH_INFOR))+"x"+str(int(height/2))
 
@@ -412,6 +413,6 @@ feedback.grid(row=0,column=2)
 
 with open(MODEL, 'rb') as f:
     model = pickle.load(f)
-    
+
 show_frames()
 win.mainloop()
