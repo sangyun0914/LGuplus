@@ -359,19 +359,19 @@ def main(cap):
 
             dictEval = {"4":"Bad", "5":"Normal", "6":"Good"}
 
-            # if (cur == "squat"):
-            #   left, right = EvalulateSquatPose(image,results.pose_landmarks.landmark)
+            if (cur == "squat"):
+              left, right = EvalulateSquatPose(image,results.pose_landmarks.landmark)
 
-            #   if (left < right):
-            #     cv2.putText(image, "left leg -> {} squat".format(str(dictEval[str(left)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-            #   else:
-            #     cv2.putText(image, "right leg -> {} squat".format(str(dictEval[str(right)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+              if (left < right):
+                cv2.putText(image, "left leg -> {} squat".format(str(dictEval[str(left)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+              else:
+                cv2.putText(image, "right leg -> {} squat".format(str(dictEval[str(right)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
               
-            # elif (cur == "lunge"):
-            #   pass
+            elif (cur == "lunge"):
+              pass
 
-            # elif (cur == "pushup"):
-            #   pass
+            elif (cur == "pushup"):
+              pass
 
             doAction = ActionPerformed(prev,cur)
 
@@ -414,8 +414,8 @@ def main(cap):
   cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-  # cap = cv2.VideoCapture("TestVideo/video/YoutubeTest.mp4")
-  cap = cv2.VideoCapture(0)
+  cap = cv2.VideoCapture("TestVideo/video/YoutubeTest.mp4")
+  # cap = cv2.VideoCapture(0)
   StartEngine(cap)
   main(cap)
 
