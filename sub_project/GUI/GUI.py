@@ -11,6 +11,8 @@ import pickle
 import pandas as pd
 import math
 
+# https://m.blog.naver.com/chandong83/221124467992
+
 # Draw mediapipe
 mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
@@ -311,19 +313,18 @@ def show_frames():
 
       dictEval = {"4":"Bad", "5":"Normal", "6":"Good"}
 
-      # if (cur == "squat"):
-      #   left, right = EvalulateSquatPose(image,results.pose_landmarks.landmark)
+      if (cur == "squat"):
+        left, right = EvalulateSquatPose(image,results.pose_landmarks.landmark)
+        if (left < right):
+          cv2.putText(image, "left leg -> {} squat".format(str(dictEval[str(left)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+        else:
+          cv2.putText(image, "right leg -> {} squat".format(str(dictEval[str(right)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
 
-      #   if (left < right):
-      #     cv2.putText(image, "left leg -> {} squat".format(str(dictEval[str(left)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-      #   else:
-      #     cv2.putText(image, "right leg -> {} squat".format(str(dictEval[str(right)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        
-      # elif (cur == "lunge"):
-      #   pass
+      elif (cur == "lunge"):
+        pass
 
-      # elif (cur == "pushup"):
-      #   pass
+      elif (cur == "pushup"):
+        pass
 
       doAction = ActionPerformed(prev,cur)
 

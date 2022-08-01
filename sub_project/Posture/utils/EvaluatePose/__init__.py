@@ -1,0 +1,3 @@
+from .EvaluateSquatPose import EvalulateSquatPose
+from .EvaluatePushUpPose import EvalulatePushUpPose
+from .EvaluateLungePose import EvalulateSquatPose

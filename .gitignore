@@ -22,3 +22,5 @@ main_project/MHI/data
 main_project/MHI/models
 sub_project/SkeletonMHIObjectDetection/model/*
 sub_project/SkeletonMHIObjectDetection/video/*
+sub_project/Posture/TestVideo
+sub_project/ShortLSTM/ToolKitForActionRecognition/MP_Data
