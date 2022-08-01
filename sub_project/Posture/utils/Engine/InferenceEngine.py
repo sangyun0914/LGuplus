@@ -8,7 +8,12 @@ import warnings
 import math
 import sys
 import os
-from ..EvaluatePose import EvaluateSquatPose as esp
+#from ..EvaluatePose import EvaluateSquatPose as esp
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
+from EvaluatePose import EvaluateLungePose
+from EvaluatePose import EvaluatePushUpPose
+from EvaluatePose import EvaluateSquatPose as esp
 
 mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
@@ -88,7 +93,7 @@ def InferenceEngine(cap,MODEL):
             cur = body_language_class
 
             if (cur == "squat"):
-              esp(image,results.pose_landmarks.landmark)
+              esp.EvalulateSquatPose(image,results.pose_landmarks.landmark)
             elif (cur == "lunge"):
               pass
 
