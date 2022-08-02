@@ -13,7 +13,7 @@ from tensorflow.keras.callbacks import TensorBoard
 # Path for exported data, numpy arrays
 DATA_PATH = os.path.join('gruData') 
 # Actions that we try to detect
-actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up'])
+actions = np.array(['squat-down','squat-up','pushup-down','pushup-up','lunge-down','lunge-up','stand'])
 
 
 # Videos are going to be 30 frames in length
@@ -45,17 +45,17 @@ log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential() # 30 frame, 1662 length .npy file
-model.add(GRU(64, return_sequences=True, activation='relu', input_shape=(30,132)))
-model.add(GRU(128, return_sequences=True, activation='relu'))
-model.add(GRU(64, return_sequences=False, activation='relu'))
-model.add(Dense(64, activation='relu'))
-model.add(Dense(32, activation='relu'))
+model.add(GRU(64, return_sequences=True, activation='relu', input_shape=(30,48)))
+# model.add(GRU(128, return_sequences=True, activation='relu'))
+# model.add(GRU(64, return_sequences=False, activation='relu'))
+# model.add(Dense(64, activation='relu'))
+# model.add(Dense(32, activation='relu'))
 model.add(Dense(actions.shape[0], activation='softmax'))
 
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 # train
-model.fit(X_train, y_train, epochs=1, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=20, callbacks=[tb_callback])
 
 model.summary()
 
