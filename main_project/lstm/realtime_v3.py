@@ -11,10 +11,12 @@ model = test.initModel()
 extract = np.empty((1, 88))
 
 cap = cv2.VideoCapture(0)
-with mp_pose.Pose(
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5) as pose:
+with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+    i = 0
+    sum = 0
+    SFPS = ""
     while cap.isOpened():
+        start_t = timeit.default_timer()
         success, image = cap.read()
         if not success:
             continue
@@ -36,7 +38,6 @@ with mp_pose.Pose(
         temp = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten(
         ) if results.pose_world_landmarks else np.zeros(132)
 
-        # 얼굴을 제외한 22개의 랜드마크만 사용하기 위해 0~43번 인덱스 내용은 버림
         angles = extraFeatures.extractAngles(results)
 
         left_upper = np.hstack(
@@ -64,6 +65,20 @@ with mp_pose.Pose(
                         font, 2, (255, 0, 0), 2)
             cv2.putText(image, str(prob), (50, 300),
                         font, 2, (255, 0, 0), 2)
+
+        terminate_t = timeit.default_timer()
+        FPS = 1./(terminate_t - start_t)
+        sum = FPS+sum
+        if SFPS == "":
+            SFPS = str(FPS)
+        if i == 10:
+            sum = sum/10
+            sum = round(sum, 4)
+            SFPS = str(sum)
+            i = 0
+            sum = 0
+        i += 1
+        cv2.putText(image, "FPS : "+SFPS, (640, 60), 0, 1, (255, 0, 0), 3)
 
         cv2.imshow('Testing', image)
 
