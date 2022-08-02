@@ -1,47 +1,13 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import cv2
-import mediapipe as mp
-import numpy as np
-import copy
-import time
-
-
-mp_pose = mp.solutions.pose
-
-actions = ['squat-down', 'squat-up', 'pushup-down',
-           'pushup-up', 'lunge-down', 'lunge-up']
+from configs import *
+from model_v3 import Model
 
 seq_length = 30  # 20 프레임
 data_dim = 88  # 22개의 랜드마크, 랜드마크의 x, y, z, visibility + 8개 관절 각도
 
 
-class Model(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, layers):
-        super(Model, self).__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim,
-                            num_layers=layers, batch_first=True, bias=True, dropout=0.3, bidirectional=False)
-        self.fc1 = nn.Linear(hidden_dim, hidden_dim, bias=True)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim, bias=True)
-        self.fc3 = nn.Linear(hidden_dim, output_dim, bias=True)
-        self.silu = nn.SiLU()
-        self.relu = nn.ReLU()
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        x = x.view([-1, seq_length, data_dim])
-        x, _status = self.lstm(x)
-        x = self.silu(self.fc1(x[:, -1]))
-        x = self.silu(self.fc2(x))
-        x = self.fc3(x)
-        # x = self.softmax(x)
-        return x
-
-
 def initModel():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = torch.load('./model/model_mk3.pt', map_location=device)
+    model = torch.load('./model/model_mk5.pt', map_location=device)
     print(model)
     return model
 

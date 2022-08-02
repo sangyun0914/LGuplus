@@ -1,10 +1,5 @@
-import os
-import numpy as np
+from configs import *
 import sampling20 as smp
-
-# 운동 종류 지정
-actions = ['squat-down', 'squat-up', 'pushup-down',
-           'pushup-up', 'lunge-down', 'lunge-up']
 
 
 def makelabel(action):
