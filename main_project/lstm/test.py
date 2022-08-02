@@ -13,15 +13,15 @@ def initModel():
 
 
 def testModel(model, test_data):
-    start = time.time()
+    # start = time.time()
     model.eval()
     with torch.no_grad():
         out = model(test_data)
         out = np.squeeze(out)
         out = F.softmax(out, dim=0)
         # print(actions[out.numpy().argmax()])
-    m, s = divmod(time.time() - start, 60)
-    print(f'Inference time: {m:.0f}m {s:.5f}s')
+    # m, s = divmod(time.time() - start, 60)
+    # print(f'Inference time: {m:.0f}m {s:.5f}s')
     # print(out)
     # print(out.numpy().argmax())
     return out[out.numpy().argmax()], actions[out.numpy().argmax()]
