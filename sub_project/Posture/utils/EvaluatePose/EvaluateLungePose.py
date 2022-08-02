@@ -12,10 +12,6 @@ mp_selfie_segmentation = mp.solutions.selfie_segmentation
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-# CONST
-SQUAT, LUNGE, PUSHUP, NONE = 0,1,2,3
-BAD, NORMAL, GOOD = 4,5,6
-
 def findAngle(x1, y1, x2, y2, cx, cy):
   division_degree_first = x2-cx
   if (division_degree_first <= 0):
@@ -126,18 +122,18 @@ def EvalulateSquatPose(image,landmark_pose):
   resultOfSquat_left = 0
   resultOfSquat_right = 0
 
-  if (degreeOfLeftLeg >= 130):
-    resultOfSquat_left = BAD
-  elif (degreeOfLeftLeg<130 and degreeOfLeftLeg>=90):
-    resultOfSquat_left = NORMAL
-  else:
-    resultOfSquat_left = GOOD
+  # if (degreeOfLeftLeg >= 130):
+  #   resultOfSquat_left = BAD
+  # elif (degreeOfLeftLeg<130 and degreeOfLeftLeg>=90):
+  #   resultOfSquat_left = NORMAL
+  # else:
+  #   resultOfSquat_left = GOOD
 
-  if (degreeOfRightLeg >= 130):
-    resultOfSquat_right = BAD
-  elif (degreeOfRightLeg<130 and degreeOfRightLeg>=90):
-    resultOfSquat_right = NORMAL
-  else:
-    resultOfSquat_right = GOOD
+  # if (degreeOfRightLeg >= 130):
+  #   resultOfSquat_right = BAD
+  # elif (degreeOfRightLeg<130 and degreeOfRightLeg>=90):
+  #   resultOfSquat_right = NORMAL
+  # else:
+  #   resultOfSquat_right = GOOD
 
   return resultOfSquat_left,resultOfSquat_right

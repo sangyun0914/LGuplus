@@ -27,74 +27,70 @@ def draw_styled_landmarks(image, results):
         landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 
 def extract_keypoints(results):
-    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten() if results.pose_world_landmarks.landmark else np.zeros(33*4)
-    return pose
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten() if results.pose_world_landmarks else np.zeros(33*4)
 
+    return pose
 
 # Path for exported data, numpy arrays
 DATA_PATH = os.path.join('MP_Data') 
 
 # Actions that we try to detect
-actions = np.array(['left','right','stand'])
+action = "pushup"
+VIDEO_PATH = 'fullVideo/fullpushup.mp4'
 
+cap = cv2.VideoCapture(VIDEO_PATH)
+no_sequences = 0
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    else:
+        no_sequences += 1
+        print("COUNTING FRAME NUM...{}".format(no_sequences))
+
+cap.release()
+cv2.destroyAllWindows()
 # Thirty videos worth of data
-no_sequences = 30
 
 # Videos are going to be 30 frames in length
-sequence_length = 30
+sequence_length = 5
 
-for action in actions: 
-    for sequence in range(no_sequences):
-        try: 
-            os.makedirs(os.path.join(DATA_PATH, action, str(sequence)))
-        except:
-            pass
+for sequence in range(no_sequences):
+    try: 
+        os.makedirs(os.path.join(DATA_PATH, action, str(sequence)))
+    except:
+        pass
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(VIDEO_PATH)
 # Set mediapipe model 
-with mp_pose.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    
-    # NEW LOOP
-    # Loop through actions
-    for action in actions:
-        # Loop through sequences aka videos
-        for sequence in range(no_sequences):
-            # Loop through video length aka sequence length
-            for frame_num in range(sequence_length):
+with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.5) as pose:
+    # Loop through sequences aka videos
+    for sequence in range(no_sequences):
+        # Loop through video length aka sequence length
+        for frame_num in range(sequence_length):
 
-                # Read feed
-                ret, frame = cap.read()
+            # Read feed
+            ret, frame = cap.read()
+        
+            if not ret:
+                break
 
-                # Make detections
-                image, results = mediapipe_detection(frame, pose)
+            # Make detections
+            image, results = mediapipe_detection(frame, pose)
 #                 print(results)
 
-                # Draw landmarks
-                draw_styled_landmarks(image, results)
-                
-                # NEW Apply wait logic
-                if frame_num == 0: 
-                    cv2.putText(image, 'STARTING COLLECTION', (120,200), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255, 0), 4, cv2.LINE_AA)
-                    cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence), (15,12), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-                    # Show to screen
-                    cv2.imshow('OpenCV Feed', image)
-                    cv2.waitKey(2000)
-                else:
-                    cv2.putText(image, 'Collecting frames for {} Video Number {}'.format(action, sequence), (15,12), 
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
-                    # Show to screen
-                    cv2.imshow('OpenCV Feed', image)
-                
-                # NEW Export keypoints
-                keypoints = extract_keypoints(results)
-                npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
-                np.save(npy_path, keypoints)
+            # Draw landmarks
+            draw_styled_landmarks(image, results)
+            
+            # NEW Export keypoints
+            keypoints = extract_keypoints(results)
+            npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
+            np.save(npy_path, keypoints)
 
-                # Break gracefully
-                if cv2.waitKey(10) & 0xFF == ord('q'):
-                    break
-                    
-    cap.release()
-    cv2.destroyAllWindows()
+            cv2.imshow("data collect",image)
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                break
+
+cap.release()
+cv2.destroyAllWindows()

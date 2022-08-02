@@ -14,19 +14,19 @@ from tensorflow.keras.callbacks import TensorBoard
 DATA_PATH = os.path.join('MP_Data') 
 
 # Actions that we try to detect
-actions = np.array(['left','right','stand'])
+actions = np.array(['lunge','lying','pushup','squat','stand'])
 
-# Thirty videos worth of data
-no_sequences = 30
+no_sequences = 297
 
 # Videos are going to be 30 frames in length
-sequence_length = 30
+sequence_length = 5
 
 label_map = {label:num for num, label in enumerate(actions)}
 
 # sequences : x,y data | labels : what is it 
 sequences, labels = [], []
 for action in actions:
+    print(action)
     for sequence in range(no_sequences):
         window = []
         for frame_num in range(sequence_length):
@@ -44,7 +44,7 @@ log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential() # 30 frame, 1662 length .npy file
-model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
+model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(5,132)))
 model.add(LSTM(128, return_sequences=True, activation='relu'))
 model.add(LSTM(64, return_sequences=False, activation='relu'))
 model.add(Dense(64, activation='relu'))
@@ -54,8 +54,8 @@ model.add(Dense(actions.shape[0], activation='softmax'))
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 # train
-model.fit(X_train, y_train, epochs=2000, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=100, callbacks=[tb_callback])
 
 model.summary()
 
-model.save('action.h5')
+model.save('ActionV2.h5')
