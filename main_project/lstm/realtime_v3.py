@@ -8,7 +8,7 @@ data_dim = config['data_dim']
 
 model = test.initModel()
 
-extract = np.empty((1, 88))
+extract = np.empty((1, data_dim))
 
 cap = cv2.VideoCapture(0)
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
