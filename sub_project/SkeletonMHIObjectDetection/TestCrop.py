@@ -9,6 +9,7 @@
 # Pushup - 18
 
 from asyncio import FastChildWatcher
+from sklearn import exceptions
 import torch
 import numpy as np
 import cv2
@@ -262,8 +263,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_SHOULDER.visibility < 0.5):
     RIGHT_SHOULDER_X = 0
     RIGHT_SHOULDER_Y = 0
-  LIST_COORD_RIGHT_SHOULDER.insert(0,(RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y))
   LIST_COORD_RIGHT_SHOULDER.pop(POPNUM)
+  LIST_COORD_RIGHT_SHOULDER.insert(0,(RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y))
 
   LEFT_SHOULDER = landmark_pose[11]
   LEFT_SHOULDER_X = int(LEFT_SHOULDER.x * image_width)
@@ -271,13 +272,13 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_SHOULDER.visibility < 0.5):
     LEFT_SHOULDER_X = 0
     LEFT_SHOULDER_Y = 0
-  LIST_COORD_LEFT_SHOULDER.insert(0,(LEFT_SHOULDER_X,LEFT_SHOULDER_Y))
   LIST_COORD_LEFT_SHOULDER.pop(POPNUM)
+  LIST_COORD_LEFT_SHOULDER.insert(0,(LEFT_SHOULDER_X,LEFT_SHOULDER_Y))
   
   CENTER_SHOULDER_X = int((RIGHT_SHOULDER_X+LEFT_SHOULDER_X)/2)
   CENTER_SHOULDER_Y = int((RIGHT_SHOULDER_Y+LEFT_SHOULDER_Y)/2)
-  LIST_COORD_CENTER_SHOULDER.insert(0,(CENTER_SHOULDER_X,CENTER_SHOULDER_Y))
   LIST_COORD_CENTER_SHOULDER.pop(POPNUM)  
+  LIST_COORD_CENTER_SHOULDER.insert(0,(CENTER_SHOULDER_X,CENTER_SHOULDER_Y))
 
   RIGHT_ELBOW = landmark_pose[14]
   RIGHT_ELBOW_X = int(RIGHT_ELBOW.x * image_width)
@@ -285,8 +286,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_ELBOW.visibility < 0.5):
     RIGHT_ELBOW_X = 0
     RIGHT_ELBOW_Y = 0
-  LIST_COORD_RIGHT_ELBOW.insert(0,(RIGHT_ELBOW_X,RIGHT_ELBOW_Y))
   LIST_COORD_RIGHT_ELBOW.pop(POPNUM)
+  LIST_COORD_RIGHT_ELBOW.insert(0,(RIGHT_ELBOW_X,RIGHT_ELBOW_Y))
 
   LEFT_ELBOW = landmark_pose[13]
   LEFT_ELBOW_X = int(LEFT_ELBOW.x * image_width)
@@ -294,8 +295,8 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_ELBOW.visibility < 0.5):
     LEFT_ELBOW_X = 0
     LEFT_ELBOW_Y = 0
-  LIST_COORD_LEFT_ELBOW.insert(0,(LEFT_ELBOW_X,LEFT_ELBOW_Y))
   LIST_COORD_LEFT_ELBOW.pop(POPNUM)
+  LIST_COORD_LEFT_ELBOW.insert(0,(LEFT_ELBOW_X,LEFT_ELBOW_Y))
 
   RIGHT_WRIST = landmark_pose[16]
   RIGHT_WRIST_X = int(RIGHT_WRIST.x * image_width)
@@ -303,8 +304,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_WRIST.visibility < 0.5):
     RIGHT_WRIST_X = 0
     RIGHT_WRIST_Y = 0
-  LIST_COORD_RIGHT_WRIST.insert(0,(RIGHT_WRIST_X,RIGHT_WRIST_Y))
   LIST_COORD_RIGHT_WRIST.pop(POPNUM)
+  LIST_COORD_RIGHT_WRIST.insert(0,(RIGHT_WRIST_X,RIGHT_WRIST_Y))
 
   LEFT_WRIST = landmark_pose[15]
   LEFT_WRIST_X = int(LEFT_WRIST.x * image_width)
@@ -312,8 +313,8 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_WRIST.visibility < 0.5):
     LEFT_WRIST_X = 0
     LEFT_WRIST_X = 0
-  LIST_COORD_LEFT_WRIST.insert(0,(LEFT_WRIST_X,LEFT_WRIST_Y))
   LIST_COORD_LEFT_WRIST.pop(POPNUM)
+  LIST_COORD_LEFT_WRIST.insert(0,(LEFT_WRIST_X,LEFT_WRIST_Y))
   
   RIGHT_HIP = landmark_pose[24]
   RIGHT_HIP_X = int(RIGHT_HIP.x * image_width)
@@ -321,8 +322,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_HIP.visibility < 0.5):
     RIGHT_HIP_X = 0
     RIGHT_HIP_Y = 0
-  LIST_COORD_RIGHT_HIP.insert(0,(RIGHT_HIP_X,RIGHT_HIP_Y))
   LIST_COORD_RIGHT_HIP.pop(POPNUM)
+  LIST_COORD_RIGHT_HIP.insert(0,(RIGHT_HIP_X,RIGHT_HIP_Y))
   
   LEFT_HIP = landmark_pose[23]
   LEFT_HIP_X = int(LEFT_HIP.x * image_width)
@@ -330,13 +331,13 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_HIP.visibility < 0.5):
     LEFT_HIP_X = 0
     LEFT_HIP_Y = 0
-  LIST_COORD_LEFT_HIP.insert(0,(LEFT_HIP_X,LEFT_HIP_Y))
   LIST_COORD_LEFT_HIP.pop(POPNUM)
+  LIST_COORD_LEFT_HIP.insert(0,(LEFT_HIP_X,LEFT_HIP_Y))
 
   CENTER_HIP_X = int((RIGHT_HIP_X+LEFT_HIP_X)/2)
   CENTER_HIP_Y = int((RIGHT_HIP_Y+LEFT_HIP_Y)/2) 
-  LIST_COORD_CENTER_HIP.insert(0,(CENTER_HIP_X,CENTER_HIP_Y))
   LIST_COORD_CENTER_HIP.pop(POPNUM)
+  LIST_COORD_CENTER_HIP.insert(0,(CENTER_HIP_X,CENTER_HIP_Y))
 
   RIGHT_KNEE = landmark_pose[26]
   RIGHT_KNEE_X = int(RIGHT_KNEE.x * image_width)
@@ -344,8 +345,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_KNEE.visibility < 0.5):
     RIGHT_KNEE_X = 0
     RIGHT_KNEE_Y = 0
-  LIST_COORD_RIGHT_KNEE.insert(0,(RIGHT_KNEE_X,RIGHT_KNEE_Y))
   LIST_COORD_RIGHT_KNEE.pop(POPNUM)
+  LIST_COORD_RIGHT_KNEE.insert(0,(RIGHT_KNEE_X,RIGHT_KNEE_Y))
   
   LEFT_KNEE = landmark_pose[25]
   LEFT_KNEE_X = int(LEFT_KNEE.x * image_width)
@@ -353,8 +354,8 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_KNEE.visibility < 0.5):
     LEFT_KNEE_X = 0
     LEFT_KNEE_Y = 0
-  LIST_COORD_LEFT_KNEE.insert(0,(LEFT_KNEE_X,LEFT_KNEE_Y))
   LIST_COORD_LEFT_KNEE.pop(POPNUM)
+  LIST_COORD_LEFT_KNEE.insert(0,(LEFT_KNEE_X,LEFT_KNEE_Y))
 
   RIGHT_ANKLE = landmark_pose[28]
   RIGHT_ANKLE_X = int(RIGHT_ANKLE.x * image_width)
@@ -362,8 +363,8 @@ def InsertCoordinate(image,landmark_pose):
   if (RIGHT_ANKLE.visibility < 0.5):
     RIGHT_ANKLE_X = 0
     RIGHT_ANKLE_Y = 0
-  LIST_COORD_RIGHT_ANKLE.insert(0,(RIGHT_ANKLE_X,RIGHT_ANKLE_Y))
   LIST_COORD_RIGHT_ANKLE.pop(POPNUM)
+  LIST_COORD_RIGHT_ANKLE.insert(0,(RIGHT_ANKLE_X,RIGHT_ANKLE_Y))
   
   LEFT_ANKLE = landmark_pose[27]
   LEFT_ANKLE_X = int(LEFT_ANKLE.x * image_width)
@@ -371,8 +372,8 @@ def InsertCoordinate(image,landmark_pose):
   if (LEFT_ANKLE.visibility < 0.5):
     LEFT_ANKLE_X = 0
     LEFT_ANKLE_Y = 0 
-  LIST_COORD_LEFT_ANKLE.insert(0,(LEFT_ANKLE_X,LEFT_ANKLE_Y))
   LIST_COORD_LEFT_ANKLE.pop(POPNUM)
+  LIST_COORD_LEFT_ANKLE.insert(0,(LEFT_ANKLE_X,LEFT_ANKLE_Y))
   
   if (LIST_COORD_RIGHT_SHOULDER[0][0]!=0 and LIST_COORD_RIGHT_ELBOW[0][0]!=0):
     # 오른쪽 어깨 - 오른쪽 팔꿈치
@@ -571,11 +572,13 @@ def StartEngine(cap):
         if (frame_count == 50):
           break
     cv2.destroyAllWindows()
-def CropImages():
+def CropImages(width,height):
+  BLANK = 20
+
   X_Coord = np.array([])
   Y_Coord = np.array([])
   for i in range(MHI_DURATION):
-    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_SHOULDER[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_SHOULDER[i][0])) 
     X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_SHOULDER[i][0]))
     X_Coord = np.append(X_Coord,np.array(LIST_COORD_CENTER_SHOULDER[i][0]))
     X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_ELBOW[i][0]))
@@ -604,13 +607,26 @@ def CropImages():
     Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_KNEE[i][1]))
     Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_ANKLE[i][1]))
     Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_ANKLE[i][1]))
-  
-  X_Max = np.max(X_Coord)
-  X_Min = np.min(X_Coord)
 
-  Y_Max = np.max(Y_Coord)
-  Y_Min = np.min(Y_Coord)
+  X_Coord = np.delete(X_Coord,0)
+  Y_Coord = np.delete(Y_Coord,0)
 
+  X_Max = int(np.max(X_Coord))-BLANK
+  X_Min = int(np.min(X_Coord))+BLANK
+
+  if (X_Max>width):
+    X_Max = width
+  if (X_Min<0):
+    X_Min = 0
+
+  Y_Max = int(np.max(Y_Coord))-BLANK
+  Y_Min = int(np.min(Y_Coord))+BLANK
+
+  if (Y_Max > height):
+    Y_Max = height
+  if (Y_Min < 0):
+    Y_Min = 0
+  print(X_Max,X_Min,Y_Max,Y_Min)
   return X_Max,X_Min,Y_Max,Y_Min
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='./model/ActionDetectionBestv3.pt', force_reload=True)
@@ -621,10 +637,10 @@ NumPushup = 0
 
 actionList = [("stand",5),("stand",5),("stand",5)]
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("video/202207201348_original.avi")
 # cap = cv2.VideoCapture(0)
 # wake up
-StartEngine(cap)
+# StartEngine(cap)
 # detection
 with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
   previous = "stand"
@@ -640,8 +656,12 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
       frame.flags.writeable = False
       frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
       results = pose.process(frame)
-      XMax,XMin,YMax,YMin = CropImages()
-      crop = frame[YMin:YMax, XMin:XMax] #세로로 100-200까지, 가로로 200-400까지 자름
+      XMax,XMin,YMax,YMin = CropImages(image_width,image_height)
+      try:
+        crop = frame[YMin:YMax, XMin:XMax] #세로로 100-200까지, 가로로 200-400까지 자름
+        cv2.imshow("Crop",crop)
+      except:
+        pass
 
       frame.flags.writeable = True
       if results.pose_landmarks:
