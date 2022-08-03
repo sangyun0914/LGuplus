@@ -1,13 +1,10 @@
 from configs import *
 
-# 데이터 셋 csv 파일명 유의!!
-dataset_file = 'mydataset_v3.csv'
-
 output_dim = config['output_dim']
 
 
 class MyDataset(Dataset):
-    def __init__(self):
+    def __init__(self, dataset_file):
         data = np.loadtxt(dataset_file, delimiter=",", dtype=np.float32)
         self.len = data.shape[0]
         self.x_data = torch.from_numpy(data[:, 0:-output_dim])

@@ -36,7 +36,7 @@ class Model(nn.Module):
         left_lower_data = x[:, :, 44:66]
         right_lower_data = x[:, :, 66:88]
 
-        left_upper, _ = self.lstm1(left_upper_data)  # (32,30,10)
+        left_upper, _ = self.lstm1(left_upper_data)
         right_upper, _ = self.lstm2(right_upper_data)
         left_lower, _ = self.lstm3(left_lower_data)
         right_lower, _ = self.lstm4(right_lower_data)

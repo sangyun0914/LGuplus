@@ -18,11 +18,11 @@ mp_pose = mp.solutions.pose
 
 
 actions = ['squat-down', 'squat-up', 'pushup-down',
-           'pushup-up', 'lunge-down', 'lunge-up', 'stand']
+           'pushup-up', 'lunge-down', 'lunge-up', 'stand', 'stand2push', 'push2stand']
 
 config = {}
 
-config['seq_length'] = 30  # 20 프레임
+config['seq_length'] = 20  # 20 프레임
 config['data_dim'] = 88
 config['hidden_dim'] = 20
 config['output_dim'] = len(actions)  # 운동 종류

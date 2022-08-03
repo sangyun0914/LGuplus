@@ -16,13 +16,13 @@ model_name = 'model_mk6'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # 데이터 셋 설정
-# training : validation = 8 : 2 비율로 랜덤하게 나눔
-dataset = MyDataset()
-dataset_size = len(dataset)
+train_dataset = MyDataset('mydataset_v3_train.csv')
+validation_dataset = MyDataset('mydataset_v3_valid.csv')
+"""dataset_size = len(dataset)
 train_size = int(dataset_size * 0.8)
 validation_size = dataset_size - train_size
 train_dataset, validation_dataset = torch.utils.data.random_split(
-    dataset, [train_size, validation_size])
+    dataset, [train_size, validation_size])"""
 train_loader = DataLoader(dataset=train_dataset,
                           batch_size=batch_size, shuffle=True)
 validation_loader = DataLoader(
@@ -71,7 +71,7 @@ def train(epoch):
     valid_loss_val.append(valid_loss.item())
 
     if (epoch % 50) == 0:
-        torch.save(model, './model/{}_{}epoch_{:.4f}trainloss_{:.4f}validloss.pt'.format(
+        torch.save(model, './model/{}_{}_{:.4f}_{:.4f}.pt'.format(
             model_name, epoch, loss.item(), valid_loss.item()))
 
 

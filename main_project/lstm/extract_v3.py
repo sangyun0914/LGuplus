@@ -90,6 +90,16 @@ def main():
                 extractPoseV3(video_path, filename +
                               str(degree), csv_path, degree)
 
+    for action in actions:
+        for filename in os.listdir("./valid_videos/{0}".format(action)):
+            if filename.endswith('.DS_Store'):
+                continue
+            video_path = os.path.join("./valid_videos/{0}".format(action), filename)
+            csv_path = os.path.join('./csv_part_valid/{0}_csv'.format(action))
+            for degree in degrees:
+                extractPoseV3(video_path, filename +
+                              str(degree), csv_path, degree)
+
 
 if __name__ == '__main__':
     main()
