@@ -25,7 +25,7 @@ class Model(nn.Module):
         self.lstm7 = nn.LSTM(20, 10,
                              num_layers=layers, batch_first=True, bias=True, dropout=dropout)
         self.fc1 = nn.Linear(10, 10, bias=True)
-        self.fc2 = nn.Linear(10, 4, bias=True)
+        self.fc2 = nn.Linear(10, len(actions), bias=True)
         self.silu = nn.SiLU()
 
     def forward(self, x):

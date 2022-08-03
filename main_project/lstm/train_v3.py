@@ -7,17 +7,26 @@ lstm_layers = config['lstm_layers']
 dropout = config['dropout']
 
 # 학습 파라미터 설정
-learning_rate = 0.0005
-epochs = 100
+learning_rate = 0.0001
+epochs = 500
 batch_size = 32
-model_name = 'model_mk5'
+model_name = 'model_mk6'
 
 # cpu, gpu 설정
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # 데이터 셋 설정
+# training : validation = 8 : 2 비율로 랜덤하게 나눔
 dataset = MyDataset()
-train_loader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True)
+dataset_size = len(dataset)
+train_size = int(dataset_size * 0.8)
+validation_size = dataset_size - train_size
+train_dataset, validation_dataset = torch.utils.data.random_split(
+    dataset, [train_size, validation_size])
+train_loader = DataLoader(dataset=train_dataset,
+                          batch_size=batch_size, shuffle=True)
+validation_loader = DataLoader(
+    dataset=validation_dataset, batch_size=batch_size, shuffle=True)
 
 # 모델 설정
 model = Model(lstm_layers, dropout)
@@ -26,8 +35,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 # 학습
-
-loss_val = []
+train_loss_val = []
+valid_loss_val = []
 
 
 def train(epoch):
@@ -43,12 +52,27 @@ def train(epoch):
         optimizer.step()
 
         if batch_idx % 10 == 0:
-            loss_val.append(loss.item())
-
-        if batch_idx % 10 == 0:
-            print('Train Epoch: {:4d} | Batch Status: {:3d}/{} ({:2.0f}%) | Loss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(train_loader.dataset),
+            print('Train Epoch: {:4d}/{} | Batch Status: {:3d}/{} ({:2.0f}%) | Training Loss: {:.6f}'.format(
+                epoch, epochs, batch_idx *
+                len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
+
+    with torch.no_grad():
+        model.eval()
+        for batch_idx, (data, target) in enumerate(validation_loader):
+            data = data.to(device)
+            target = target.to(device)
+            target = target.long()
+            target = target.argmax(axis=1)
+            valid_output = model(data)
+            valid_loss = criterion(valid_output, target)
+
+    train_loss_val.append(loss.item())
+    valid_loss_val.append(valid_loss.item())
+
+    if (epoch % 50) == 0:
+        torch.save(model, './model/{}_{}epoch_{:.4f}trainloss_{:.4f}validloss.pt'.format(
+            model_name, epoch, loss.item(), valid_loss.item()))
 
 
 if __name__ == '__main__':
@@ -63,8 +87,10 @@ if __name__ == '__main__':
     m, s = divmod(time.time() - since, 60)
     print(f'Total Time: {m:.0f}m {s:.0f}s\nModel was trained on {device}!')
 
-    plt.plot(np.array(loss_val))
+    plt.plot(np.array(train_loss_val), 'b')
+    plt.plot(np.array(valid_loss_val), 'r')
+    plt.savefig('loss graph.png')
     plt.show()
 
-    torch.save(model, './model/{}.pt'.format(model_name))
+    torch.save(model, './model/{}_final.pt'.format(model_name))
     print(model_name, 'Saved!')

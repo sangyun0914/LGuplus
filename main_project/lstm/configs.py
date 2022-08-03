@@ -17,10 +17,8 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 
-"""actions = ['squat-down', 'squat-up', 'pushup-down',
-           'pushup-up', 'lunge-down', 'lunge-up']"""
-
-actions = ['squat-down', 'squat-up', 'pushup-down', 'pushup-up']
+actions = ['squat-down', 'squat-up', 'pushup-down',
+           'pushup-up', 'lunge-down', 'lunge-up', 'stand']
 
 config = {}
 

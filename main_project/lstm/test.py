@@ -7,7 +7,8 @@ data_dim = 88  # 22개의 랜드마크, 랜드마크의 x, y, z, visibility + 8�
 
 def initModel():
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = torch.load('./model/model_mk5.pt', map_location=device)
+    model = torch.load(
+        '/Users/jaejoon/LGuplus/main_project/lstm/model/model_mk6_500epoch_0.0339trainloss_0.0303validloss.pt', map_location=device)
     print(model)
     return model
 
