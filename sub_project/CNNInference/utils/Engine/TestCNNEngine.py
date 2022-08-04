@@ -2,6 +2,7 @@ import pathlib
 from collections import Counter
 from glob import glob
 import os
+from typing import Dict
 
 import cv2
 import matplotlib.pyplot as plt
@@ -12,9 +13,18 @@ from PIL import Image
 from torch import cuda
 from torchvision import models, transforms
 import torch.nn as nn
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+import Dictionary as Dictionary
+import Const.const as const
+import Test as Test
 
 DIR = str(pathlib.Path(__file__).parent.resolve())
 plt.rcParams['font.size'] = 14
+
+def IncreaseNum(increaseNum):
+  increaseNum += 1
+  return increaseNum
 
 # Initialization
 MHI_DURATION = 30
@@ -76,8 +86,8 @@ def imshow_tensor(image, ax=None, title=None):
 
     return ax, image
 
-save_file_name = 'alexnet-transfer.pt'
-checkpoint_path = 'alexnet-transfer.pth'
+save_file_name = '/Users/anjunseong/Desktop/LGuplus/sub_project/Posture/utils/Engine/alexnet-transfer.pt'
+checkpoint_path = '/Users/anjunseong/Desktop/LGuplus/sub_project/Posture/utils/Engine/alexnet-transfer.pth'
 
 # Change to fit hardware
 batch_size = 32
@@ -190,6 +200,13 @@ def load_checkpoint(path):
 
     # Load in the state dict
     #model.load_state_dict(checkpoint['state_dict'])
+
+    print('model alexnet')
+    model = models.alexnet(pretrained=False)
+    # Make sure to set parameters as not trainable
+    for param in model.parameters():
+        param.requires_grad = False
+    model.classifier = checkpoint['classifier']
     model.load_state_dict(checkpoint['state_dict'])
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -482,13 +499,14 @@ def InsertCoordinate(image,landmark_pose):
 
   return image
 
-def TestEngine():
+def TestCNNEngine(cap):
   # Inference
   mp_pose = mp.solutions.pose
+  NumSquat,NumLunge,NumPushup = 0,0,0
+  dict = Dictionary.initDict()
+  predict_str = ""
 
   with torch.no_grad():
-      cap = cv2.VideoCapture('202208021443_original_LPS.avi')
-
       with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
           while (cap.isOpened()):
               ret, frame = cap.read()
@@ -513,21 +531,43 @@ def TestEngine():
 
                   frame_process = cv2.cvtColor(frame_process, cv2.COLOR_RGB2BGR)
                   frame_process = InsertCoordinate(frame_process,landmark_pose)
-                  cv2.imshow('skeleton', frame_process)
+                  
                   cv2.imwrite(DIR + '/frame.png', frame_process)
                   
+                  img, top_p, top_classes, real_class = predict(DIR + '/frame.png', model,topk=1)
 
-                  img, top_p, top_classes, real_class = predict(DIR + '/frame.png', model,topk=2)
+                  # Stand Lunge Squat Lying Pushup
+                  cur = top_classes[0]
+                  print(top_p,top_classes)
+                  cv2.putText(frame_process, cur,(150,150), cv2.FONT_HERSHEY_PLAIN, 1, (0,255,0), 2)
 
-                  print(top_p, top_classes)
+                  doAction = ""
+                  if (cur == const.STAND_STRING or cur == const.LYINGE_STRING):
+                    doAction = Dictionary.EvaluateDictAction(dict,cur)
+                    dict = Dictionary.initDict()
+                  else:
+                    Dictionary.IncreaseDict(dict,cur)
+                  
+                  if (doAction == const.SQUAT_STRING):
+                    NumSquat = IncreaseNum(NumSquat)
+                    predict_str = predict_str+"S"
 
+                  elif (doAction == const.LUNGE_STRING):
+                    NumLunge = IncreaseNum(NumLunge)
+                    predict_str = predict_str+"L"
+
+                  elif (doAction == const.PUSHUP_STRING):
+                    NumPushup = IncreaseNum(NumPushup)
+                    predict_str = predict_str+"P"
                   try: 
                     os.remove(DIR + '/frame.png')
                   except: pass
 
-              if (cv2.waitKey(10) & 0xFF == ord('q')):
+              cv2.imshow('skeleton', frame_process)
+              if (cv2.waitKey(100) & 0xFF == ord('q')):
                   break
 
           cap.release()
           cv2.destroyAllWindows()
+      return predict_str
 
