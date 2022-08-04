@@ -13,6 +13,8 @@ study/02_study/pre-study-junSeong/img/*
 sub_project/Posture/utils/Engine/alexnet-transfer.pth
 sub_project/Posture/utils/Engine/alexnet-transfer.pt
 *.pickle
+*.pth
+*.pt
 #*.pyc
 *__pychache__
 study/04_study/sangyun/images
