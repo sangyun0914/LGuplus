@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import pathlib
 
 import cv2
 from cv2 import waitKey
@@ -10,6 +11,7 @@ from torchvision import transforms
 import mediapipe as mp
 import numpy as np
 import math
+import torch.optim as optim
 from torchvision import models #[resnet, alexnet, vgg, squeezenet, densenet, inception]
 
 MHI_DURATION = 30
@@ -316,6 +318,39 @@ def initialize_model(model_name, num_classes, feature_extract, use_pretrained=Tr
         exit()
 
     return model_ft, input_size
+  
+def process_image(image_path):
+    """Process an image path into a PyTorch tensor"""
+
+    image = Image.open(image_path).convert('RGB')
+    # Resize
+    img = image.resize((256, 256))
+
+    # Center crop
+    width = 256
+    height = 256
+    new_width = 224
+    new_height = 224
+
+    left = (width - new_width) / 2
+    top = (height - new_height) / 2
+    right = (width + new_width) / 2
+    bottom = (height + new_height) / 2
+    img = img.crop((left, top, right, bottom))
+
+    # Convert to numpy, transpose color dimension and normalize
+    img = np.array(img).transpose((2, 0, 1)) / 256
+
+    # Standardization
+    means = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
+    stds = np.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
+
+    img = img - means
+    img = img / stds
+
+    img_tensor = torch.Tensor(img)
+
+    return img_tensor
 
 # Top level data directory. Here we assume the format of the direc`ory conforms
 #   to the ImageFolder structure
@@ -338,7 +373,25 @@ num_epochs = 10
 feature_extract = True
 
 # Initialize the model for this run
-model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
+model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=False)
+
+params_to_update = model_ft.parameters()
+if feature_extract:
+    params_to_update = []
+    for name,param in model_ft.named_parameters():
+        if param.requires_grad == True:
+            params_to_update.append(param)
+            print("\t",name)
+else:
+    for name,param in model_ft.named_parameters():
+        if param.requires_grad == True:
+            print("\t",name)
+
+# Observe that all parameters are being optimized
+optimizer_ft = optim.SGD(params_to_update, lr=0.001, momentum=0.9)
+
+# Setup the loss fxn
+criterion = nn.CrossEntropyLoss()
 
 #model = models.resnet18() # 기본 가중치를 불러오지 않으므로 pretrained=True를 지정하지 않습니다.
 model_ft.load_state_dict(torch.load('model_weights_v0_0.pth', map_location=device))
@@ -350,9 +403,16 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 class_names = ['lunge', 'squat', 'stand']
+DIR = str(pathlib.Path(__file__).parent.resolve())
+
+#model_ft.class_to_idx = {'Lunge': 0, 'Lying': 1, 'Pushup': 2, 'Squat': 3, 'Stand': 4}
+#model_ft.idx_to_class = {0: 'Lunge', 1: 'Lying', 2: 'Pushup', 3: 'Squat', 4: 'Stand'}
+
+model_ft.class_to_idx = {'Lunge': 0, 'Squat': 1, 'Stand': 2}
+model_ft.idx_to_class = {0: 'Lunge', 1: 'Squat', 2: 'Stand'}
 
 with torch.no_grad():
-  cap = cv2.VideoCapture('202207201352_original.avi')
+  cap = cv2.VideoCapture('202207201402_original.avi')
 
   with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
     while (cap.isOpened()):
@@ -380,8 +440,43 @@ with torch.no_grad():
 
         frame_process = cv2.cvtColor(frame_process, cv2.COLOR_RGB2BGR)
         frame_process = InsertCoordinate(frame_process,landmark_pose)
+        
+        cv2.imshow('skeleton', frame_process)
+        cv2.imwrite(DIR + '/frame.png', frame_process)
+        
+        img_tensor = process_image(DIR + '/frame.png')
+        
+        img_tensor = img_tensor.view(1, 3, 224, 224)
+            
+        # Set to evaluation
+        topk = 3
+        with torch.no_grad():
+            model_ft.eval()
+            # Model outputs log probabilities
+            out = model_ft(img_tensor)
+            ps = torch.exp(out)
+            print(ps)
 
-      # Convert the image to PyTorch tensor
+            # Find the topk predictions
+            topk, topclass = ps.topk(topk, dim=1)
+
+            # Extract the actual classes and probabilities
+            top_classes = [
+                model_ft.idx_to_class[class_] for class_ in topclass.cpu().numpy()[0]
+            ]
+            top_p = topk.cpu().numpy()[0]
+
+        img = img_tensor.cpu().squeeze()
+        top_p = top_p
+        top_classes = top_classes
+            
+        print(top_p, top_classes)
+        
+        try: 
+          os.remove(DIR + 'frame.png')
+        except: pass
+
+      '''# Convert the image to PyTorch tensor
         tensor_img = transform(frame_process)
         tensor_img = tensor_img.unsqueeze(0)
 
@@ -390,9 +485,10 @@ with torch.no_grad():
         first , predicted = torch.max(outputs, 1)
         print(predicted)
         print(class_names[predicted])
+        print("prob : {}".format(first))
         cv2.putText(frame_process, class_names[predicted], (10,50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
-        '''action = None
+        action = None
         if (predicted == 0):
           action = "lunge"
         elif (predicted == 1):
@@ -402,11 +498,12 @@ with torch.no_grad():
 
         if (first > 0.5):
           print("action : {}, prob : {}".format(action,first))
-          cv2.putText(frame, str(predicted), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)'''
+          cv2.putText(frame, str(predicted), (20,50), cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
 
         frame_process = cv2.resize(frame_process,None,fx=4,fy=4)
         #cv2.imshow('skeletonMHI', cv2.flip(frame_process,1))
         cv2.imshow('skeletonMHI', frame_process)
+        '''
       if (cv2.waitKey(10) & 0xFF == ord('q')):
         break
 
