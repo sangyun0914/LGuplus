@@ -2,6 +2,7 @@ import pathlib
 from collections import Counter
 from glob import glob
 import os
+from typing import Dict
 
 import cv2
 import matplotlib.pyplot as plt
@@ -12,9 +13,16 @@ from PIL import Image
 from torch import cuda
 from torchvision import models, transforms
 import torch.nn as nn
+import utils.Dictionary as Dictionary
+import utils.Const.const as const
+import utils.Test as Test
 
 DIR = str(pathlib.Path(__file__).parent.resolve())
 plt.rcParams['font.size'] = 14
+
+def IncreaseNum(increaseNum):
+  increaseNum += 1
+  return increaseNum
 
 # Initialization
 MHI_DURATION = 30
@@ -482,13 +490,14 @@ def InsertCoordinate(image,landmark_pose):
 
   return image
 
-def TestEngine():
+def TestEngine(cap):
   # Inference
   mp_pose = mp.solutions.pose
+  NumSquat,NumLunge,NumPushup = 0,0,0
+  dict = Dictionary.initDict()
+  predict = ""
 
   with torch.no_grad():
-      cap = cv2.VideoCapture('202208021443_original_LPS.avi')
-
       with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
           while (cap.isOpened()):
               ret, frame = cap.read()
@@ -517,10 +526,29 @@ def TestEngine():
                   cv2.imwrite(DIR + '/frame.png', frame_process)
                   
 
-                  img, top_p, top_classes, real_class = predict(DIR + '/frame.png', model,topk=2)
+                  img, top_p, top_classes, real_class = predict(DIR + '/frame.png', model,topk=1)
 
+                  # Stand Lunge Squat Lying Pushup
                   print(top_p, top_classes)
+                  cur = top_classes
+                  doAction = ""
+                  if (cur == const.STAND_STRING or cur == const.LYINGE_STRING):
+                    doAction = Dictionary.EvaluateDictAction(dict,cur)
+                    dict = Dictionary.initDict()
+                  else:
+                    Dictionary.IncreaseDict(dict,cur)
+                  
+                  if (doAction == const.SQUAT_STRING):
+                    NumSquat = IncreaseNum(NumSquat)
+                    predict = predict+"S"
 
+                  elif (doAction == const.LUNGE_STRING):
+                    NumLunge = IncreaseNum(NumLunge)
+                    predict = predict+"L"
+
+                  elif (doAction == const.PUSHUP_STRING):
+                    NumPushup = IncreaseNum(NumPushup)
+                    predict = predict+"P"
                   try: 
                     os.remove(DIR + '/frame.png')
                   except: pass
@@ -530,4 +558,5 @@ def TestEngine():
 
           cap.release()
           cv2.destroyAllWindows()
+      return predict
 

@@ -4,7 +4,8 @@ import cv2 # Import opencv
 import os
 
 if __name__ == "__main__":
+  MODEL = "model/ActionV7_rf.pkl"
   cur_path = os.getcwd()
   test_path = Test.ReturnTestPath("TestVideo")
   test_list = Test.ReturnTestList(test_path)
-  Test.RunTest(test_list)
+  Test.RunTest(test_list,MODEL)
