@@ -78,6 +78,9 @@ def train(epoch):
 if __name__ == '__main__':
     since = time.time()
 
+    print(pytorch_model_summary.summary(
+        model, torch.zeros(1, 20, 88), show_input=False))
+
     for epoch in range(1, epochs + 1):
         epoch_start = time.time()
         train(epoch)

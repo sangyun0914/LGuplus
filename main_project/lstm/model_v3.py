@@ -30,6 +30,7 @@ class Model(nn.Module):
 
     def forward(self, x):
         x = x.view([-1, seq_length, data_dim])
+        # print(x.shape)
 
         left_upper_data = x[:, :, 0:22]
         right_upper_data = x[:, :, 22:44]

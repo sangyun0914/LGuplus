@@ -16,7 +16,7 @@ flags = {'squat-down': False, 'squat-up': False, 'pushup-down': False,
          'stand': False, 'push2stand': False, 'stand2push': False}
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-video = '/Users/jaejoon/LGuplus/main_project/lstm/test_videos/202208021432_original_SPL.avi'
+video = '/Users/jaejoon/LGuplus/main_project/lstm/test_videos/202208021450_original_SLP.avi'
 cap = cv2.VideoCapture(video)
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     i = 0
