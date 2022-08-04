@@ -9,11 +9,15 @@ data_dim = config['data_dim']
 model = test.initModel()
 extract = np.empty((1, data_dim))
 action_count = []
+action_count_length = 10
+squat_cnt = 0
 flags = {'squat-down': False, 'squat-up': False, 'pushup-down': False,
          'pushup-up': False, 'lunge-down': False, 'lunge-up': False,
-         'push2stand': False, 'stand2push': False}
+         'stand': False, 'push2stand': False, 'stand2push': False}
+font = cv2.FONT_HERSHEY_SIMPLEX
 
-cap = cv2.VideoCapture(0)
+video = '/Users/jaejoon/LGuplus/main_project/lstm/test_videos/202208021432_original_SPL.avi'
+cap = cv2.VideoCapture(video)
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     i = 0
     sum = 0
@@ -22,7 +26,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         start_t = timeit.default_timer()
         success, image = cap.read()
         if not success:
-            continue
+            break
 
         # 미디어파이프를 이용하여 스켈레톤 추출
         image.flags.writeable = False
@@ -36,7 +40,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             results.pose_landmarks,
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
+        # cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
 
         temp = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten(
         ) if results.pose_world_landmarks else np.zeros(132)
@@ -61,36 +65,39 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
         if(extract.shape[0] > seq_length):
             extract = np.delete(extract, (0), axis=0)
-            font = cv2.FONT_HERSHEY_SIMPLEX
             prob, action = test.testModel(model, torch.Tensor(extract))
             prob = prob.item()
 
             if prob > config['threshold']:
                 action_count.append(action)
-                if len(action_count) > 10:
-                    action_count.pop()
+                if len(action_count) > action_count_length:
+                    action_count.pop(0)
+                # print(action_count)
+
                 cv2.putText(image, action, (50, 100),
-                            font, 2, (255, 0, 0), 2)
+                            font, 2, (0, 0, 255), 3)
                 cv2.putText(image, str(prob), (50, 300),
-                            font, 2, (255, 0, 0), 2)
+                            font, 2, (0, 0, 255), 3)
 
             for a in actions:
-                if action_count.count(a) >= 8:
+                if action_count.count(a) >= 5:
                     flags[a] = True
 
-            print(flags)
+            # print(flags)
 
-            if flags['squat-down'] and flags['squat-up']:
+            '''cv2.putText(image, 'squat-down : {}, squat-up : {}'.format(flags['squat-down'], flags['squat-up']), (0, 600),
+                        font, 1, (0, 0, 255), 3)'''
+
+            '''cv2.putText(image, str(flags), (0, 400),
+                        font, 0.5, (0, 0, 255), 2)'''
+
+            if (flags['squat-down'] and flags['squat-up']):
                 flags['squat-down'] = False
                 flags['squat-up'] = False
-                cv2.putText(image, 'squat', (50, 100),
-                            font, 2, (255, 0, 0), 2)
-            elif flags['squat-down'] and flags['squat-up']:
-                cv2.putText(image, 'squat', (50, 100),
-                            font, 2, (255, 0, 0), 2)
-            elif flags['squat-down'] and flags['squat-up']:
-                cv2.putText(image, 'squat', (50, 100),
-                            font, 2, (255, 0, 0), 2)
+                squat_cnt += 1
+
+        cv2.putText(image, 'squat : {}'.format(squat_cnt),
+                    (600, 600), font, 2, (0, 255, 0), 2)
 
         # fps 계산
         terminate_t = timeit.default_timer()

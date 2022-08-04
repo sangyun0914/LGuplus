@@ -22,10 +22,10 @@ actions = ['squat-down', 'squat-up', 'pushup-down',
 
 config = {}
 
-config['seq_length'] = 20  # 20 프레임
+config['seq_length'] = 20
 config['data_dim'] = 88
 config['hidden_dim'] = 20
 config['output_dim'] = len(actions)  # 운동 종류
 config['lstm_layers'] = 1
 config['dropout'] = 0
-config['threshold'] = 0.6
+config['threshold'] = 0.8
