@@ -25,7 +25,7 @@ class Model(nn.Module):
         self.lstm7 = nn.LSTM(20, 10,
                              num_layers=layers, batch_first=True, bias=True, dropout=dropout)
         self.fc1 = nn.Linear(10, 10, bias=True)
-        self.fc2 = nn.Linear(10, 4, bias=True)
+        self.fc2 = nn.Linear(10, len(actions), bias=True)
         self.silu = nn.SiLU()
 
     def forward(self, x):
@@ -36,7 +36,7 @@ class Model(nn.Module):
         left_lower_data = x[:, :, 44:66]
         right_lower_data = x[:, :, 66:88]
 
-        left_upper, _ = self.lstm1(left_upper_data)  # (32,30,10)
+        left_upper, _ = self.lstm1(left_upper_data)
         right_upper, _ = self.lstm2(right_upper_data)
         left_lower, _ = self.lstm3(left_lower_data)
         right_lower, _ = self.lstm4(right_lower_data)

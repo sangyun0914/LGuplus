@@ -571,6 +571,47 @@ def StartEngine(cap):
         if (frame_count == 50):
           break
     cv2.destroyAllWindows()
+def CropImages():
+  X_Coord = np.array([])
+  Y_Coord = np.array([])
+  for i in range(MHI_DURATION):
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_SHOULDER[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_SHOULDER[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_CENTER_SHOULDER[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_ELBOW[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_ELBOW[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_WRIST[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_WRIST[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_HIP[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_HIP[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_CENTER_HIP[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_KNEE[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_KNEE[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_RIGHT_ANKLE[i][0]))
+    X_Coord = np.append(X_Coord,np.array(LIST_COORD_LEFT_ANKLE[i][0]))
+
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_SHOULDER[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_SHOULDER[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_CENTER_SHOULDER[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_ELBOW[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_ELBOW[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_WRIST[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_WRIST[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_HIP[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_HIP[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_CENTER_HIP[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_KNEE[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_KNEE[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_RIGHT_ANKLE[i][1]))
+    Y_Coord = np.append(Y_Coord,np.array(LIST_COORD_LEFT_ANKLE[i][1]))
+  
+  X_Max = np.max(X_Coord)
+  X_Min = np.min(X_Coord)
+
+  Y_Max = np.max(Y_Coord)
+  Y_Min = np.min(Y_Coord)
+
+  return X_Max,X_Min,Y_Max,Y_Min
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path='./model/ActionDetectionBestv3.pt', force_reload=True)
 
@@ -599,7 +640,9 @@ with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as p
       frame.flags.writeable = False
       frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
       results = pose.process(frame)
-    
+      XMax,XMin,YMax,YMin = CropImages()
+      crop = frame[YMin:YMax, XMin:XMax] #세로로 100-200까지, 가로로 200-400까지 자름
+
       frame.flags.writeable = True
       if results.pose_landmarks:
         landmark_pose = results.pose_landmarks.landmark
