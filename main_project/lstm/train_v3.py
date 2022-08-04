@@ -82,7 +82,7 @@ if __name__ == '__main__':
         epoch_start = time.time()
         train(epoch)
         m, s = divmod(time.time() - epoch_start, 60)
-        # print(f'Training time: {m:.0f}m {s:.0f}s')
+        print(f'Training time: {m:.0f}m {s:.0f}s')
 
     m, s = divmod(time.time() - since, 60)
     print(f'Total Time: {m:.0f}m {s:.0f}s\nModel was trained on {device}!')

@@ -28,3 +28,4 @@ config['hidden_dim'] = 20
 config['output_dim'] = len(actions)  # 운동 종류
 config['lstm_layers'] = 1
 config['dropout'] = 0
+config['threshold'] = 0.6

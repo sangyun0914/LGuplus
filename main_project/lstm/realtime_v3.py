@@ -7,8 +7,11 @@ seq_length = config['seq_length']
 data_dim = config['data_dim']
 
 model = test.initModel()
-
 extract = np.empty((1, data_dim))
+action_count = []
+flags = {'squat-down': False, 'squat-up': False, 'pushup-down': False,
+         'pushup-up': False, 'lunge-down': False, 'lunge-up': False,
+         'push2stand': False, 'stand2push': False}
 
 cap = cv2.VideoCapture(0)
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -61,11 +64,35 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             font = cv2.FONT_HERSHEY_SIMPLEX
             prob, action = test.testModel(model, torch.Tensor(extract))
             prob = prob.item()
-            cv2.putText(image, action, (50, 100),
-                        font, 2, (255, 0, 0), 2)
-            cv2.putText(image, str(prob), (50, 300),
-                        font, 2, (255, 0, 0), 2)
 
+            if prob > config['threshold']:
+                action_count.append(action)
+                if len(action_count) > 10:
+                    action_count.pop()
+                cv2.putText(image, action, (50, 100),
+                            font, 2, (255, 0, 0), 2)
+                cv2.putText(image, str(prob), (50, 300),
+                            font, 2, (255, 0, 0), 2)
+
+            for a in actions:
+                if action_count.count(a) >= 8:
+                    flags[a] = True
+
+            print(flags)
+
+            if flags['squat-down'] and flags['squat-up']:
+                flags['squat-down'] = False
+                flags['squat-up'] = False
+                cv2.putText(image, 'squat', (50, 100),
+                            font, 2, (255, 0, 0), 2)
+            elif flags['squat-down'] and flags['squat-up']:
+                cv2.putText(image, 'squat', (50, 100),
+                            font, 2, (255, 0, 0), 2)
+            elif flags['squat-down'] and flags['squat-up']:
+                cv2.putText(image, 'squat', (50, 100),
+                            font, 2, (255, 0, 0), 2)
+
+        # fps 계산
         terminate_t = timeit.default_timer()
         FPS = 1./(terminate_t - start_t)
         sum = FPS+sum
