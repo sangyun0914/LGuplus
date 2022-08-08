@@ -4,7 +4,9 @@ from myDataset import MyDataset
 
 # 모델 파라미터 설정
 lstm_layers = config['lstm_layers']
+data_dim = config['data_dim']
 dropout = config['dropout']
+seq_length = config['seq_length']
 
 # 학습 파라미터 설정
 learning_rate = 0.0001
@@ -18,18 +20,13 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # 데이터 셋 설정
 train_dataset = MyDataset('mydataset_v3_train_30frames.csv')
 validation_dataset = MyDataset('mydataset_v3_valid_30frames.csv')
-"""dataset_size = len(dataset)
-train_size = int(dataset_size * 0.8)
-validation_size = dataset_size - train_size
-train_dataset, validation_dataset = torch.utils.data.random_split(
-    dataset, [train_size, validation_size])"""
 train_loader = DataLoader(dataset=train_dataset,
                           batch_size=batch_size, shuffle=True)
 validation_loader = DataLoader(
     dataset=validation_dataset, batch_size=batch_size, shuffle=True)
 
 # 모델 설정
-model = Model(lstm_layers, dropout)
+model = Model(lstm_layers, data_dim, seq_length, dropout)
 model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)

@@ -13,6 +13,11 @@ prev_flags = {'squat-down': False, 'squat-up': False, 'pushup-down': False,
 cnt = {'squat': 0, 'pushup': 0, 'lunge': 0}
 
 
+def resetCnt():
+    for key, val in cnt.items():
+        cnt[key] = 0
+
+
 def resetPrevFlags():  # 이전 플래그 전부 false로 초기화
     for action in actions:
         prev_flags[action] = False
@@ -61,4 +66,5 @@ def countAction(action_count):
     elif prev_flags['lunge-down'] and cur_flags['lunge-up']:
         cnt['lunge'] += 1
         return True, 'L'
-    return False, None
+    else:
+        return False, None
