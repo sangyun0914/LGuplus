@@ -30,3 +30,4 @@ config['output_dim'] = len(actions)  # 운동 종류
 config['lstm_layers'] = 1
 config['dropout'] = 0
 config['threshold'] = 0.8
+config['action_count_length'] = 10

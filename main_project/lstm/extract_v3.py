@@ -15,6 +15,21 @@ import extraFeatures
 # degree : 동영상 rotation 각도
 
 
+def getParts(temp, angles):
+    # 왼쪽 상체, 오른쪽 상체, 왼쪽 하체, 오른쪽 하체 순서로 재구성
+    left_upper = np.hstack(
+        [temp[0:12], temp[16:20], temp[48:52], angles[0:1], angles[2:3]])
+    right_upper = np.hstack(
+        [temp[0:8], temp[12:16], temp[20:24], temp[52:56], angles[1:2], angles[3:4]])
+    left_lower = np.hstack(
+        [temp[0:4], temp[48:60], temp[64:68], angles[4:5], angles[6:7]])
+    right_lower = np.hstack(
+        [temp[4:8], temp[48:56], temp[60:64], temp[68:72], angles[5:6], angles[7:8]])
+    temp2 = np.hstack(
+        [left_upper, right_upper, left_lower, right_lower])
+    return temp2
+
+
 def extractPoseV3(video_path, video_name, csv_path, degree):
     # 프레임마다 뽑힌 스켈레톤 좌표를 하나로 모으기 위하여 비어있는 넘파이 배열 생성
     # 파트 하나당 feature 총 22개, 파트가 4개이므로 총 88개
@@ -50,18 +65,8 @@ def extractPoseV3(video_path, video_name, csv_path, degree):
             # print(video_name)
             angles = extraFeatures.extractAngles(results)
 
-            # 왼쪽 상체, 오른쪽 상체, 왼쪽 하체, 오른쪽 하체 순서로 재구성
-            left_upper = np.hstack(
-                [temp[0:12], temp[16:20], temp[48:52], angles[0:1], angles[2:3]])
-            right_upper = np.hstack(
-                [temp[0:8], temp[12:16], temp[20:24], temp[52:56], angles[1:2], angles[3:4]])
-            left_lower = np.hstack(
-                [temp[0:4], temp[48:60], temp[64:68], angles[4:5], angles[6:7]])
-            right_lower = np.hstack(
-                [temp[4:8], temp[48:56], temp[60:64], temp[68:72], angles[5:6], angles[7:8]])
-            temp2 = np.hstack(
-                [left_upper, right_upper, left_lower, right_lower])
-            # print(temp2.shape)
+            temp2 = getParts(temp, angles)
+
             extract = np.append(extract, [temp2], axis=0)
 
     # 첫번째 열은 아무 의미 없는 값이 들어가있기 때문에 지워줌
@@ -94,7 +99,8 @@ def main():
         for filename in os.listdir("./valid_videos/{0}".format(action)):
             if filename.endswith('.DS_Store'):
                 continue
-            video_path = os.path.join("./valid_videos/{0}".format(action), filename)
+            video_path = os.path.join(
+                "./valid_videos/{0}".format(action), filename)
             csv_path = os.path.join('./csv_part_valid/{0}_csv'.format(action))
             for degree in degrees:
                 extractPoseV3(video_path, filename +

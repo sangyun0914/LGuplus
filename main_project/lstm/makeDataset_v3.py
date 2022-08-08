@@ -22,31 +22,37 @@ def makeTrainDataset():
             file = np.loadtxt(os.path.join(
                 "./csv_part/{0}_csv".format(action), filename), delimiter=",", dtype=np.float32)
 
-            # 연속된 프레임 샘플링
-            starts = [x for x in range(10)]
-            for start in starts:
-                sample_file = smp.seqSample20(file, start)
-                sample_file = sample_file.flatten()
-                sample_file = np.concatenate([sample_file, makelabel(action)])
-                dataset = np.append(dataset, [sample_file], axis=0)
+            if config['seq_length'] == 20:
+                # 연속된 프레임 샘플링
+                starts = [x for x in range(10)]
+                for start in starts:
+                    sample_file = smp.seqSample20(file, start)
+                    sample_file = sample_file.flatten()
+                    sample_file = np.concatenate(
+                        [sample_file, makelabel(action)])
+                    dataset = np.append(dataset, [sample_file], axis=0)
 
-            # 하나의 비디오를 5번 랜덤 샘플링
-            for i in range(5):
-                sample_file = smp.randSample20(file)
-                # 샘플링한 20프레임의 데이터를 하나로 펼침
-                sample_file = sample_file.flatten()
-                # 데이터 마지막에 라벨링 추가
-                sample_file = np.concatenate([sample_file, makelabel(action)])
-                dataset = np.append(dataset, [sample_file], axis=0)
-
-            #file = file.flatten()
-            #file = np.concatenate([file, makelabel(action)])
-            #dataset = np.append(dataset, [file], axis=0)
+                # 하나의 비디오를 5번 랜덤 샘플링
+                for i in range(5):
+                    sample_file = smp.randSample20(file)
+                    # 샘플링한 20프레임의 데이터를 하나로 펼침
+                    sample_file = sample_file.flatten()
+                    # 데이터 마지막에 라벨링 추가
+                    sample_file = np.concatenate(
+                        [sample_file, makelabel(action)])
+                    dataset = np.append(dataset, [sample_file], axis=0)
+            else:
+                # 그냥 30프레임 전부 사용
+                file = file.flatten()
+                file = np.concatenate([file, makelabel(action)])
+                dataset = np.append(dataset, [file], axis=0)
 
     dataset = np.delete(dataset, (0), axis=0)
     print(actions)
+    print(config['seq_length'])
     print(dataset.shape)
-    np.savetxt('mydataset_v3_train.csv', dataset, delimiter=",", fmt='%.5f')
+    np.savetxt('mydataset_v3_train_{}frames.csv'.format(
+        config['seq_length']), dataset, delimiter=",", fmt='%.5f')
 
 
 def makeValidationDataset():
@@ -62,31 +68,38 @@ def makeValidationDataset():
             file = np.loadtxt(os.path.join(
                 "./csv_part_valid/{0}_csv".format(action), filename), delimiter=",", dtype=np.float32)
 
-            # 연속된 프레임 샘플링
-            starts = [x for x in range(10)]
-            for start in starts:
-                sample_file = smp.seqSample20(file, start)
-                sample_file = sample_file.flatten()
-                sample_file = np.concatenate([sample_file, makelabel(action)])
-                dataset = np.append(dataset, [sample_file], axis=0)
+            if config['seq_length'] == 20:
+                # 연속된 프레임 샘플링
+                starts = [x for x in range(10)]
+                for start in starts:
+                    sample_file = smp.seqSample20(file, start)
+                    sample_file = sample_file.flatten()
+                    sample_file = np.concatenate(
+                        [sample_file, makelabel(action)])
+                    dataset = np.append(dataset, [sample_file], axis=0)
 
-            # 하나의 비디오를 5번 랜덤 샘플링
-            for i in range(5):
-                sample_file = smp.randSample20(file)
-                # 샘플링한 20프레임의 데이터를 하나로 펼침
-                sample_file = sample_file.flatten()
-                # 데이터 마지막에 라벨링 추가
-                sample_file = np.concatenate([sample_file, makelabel(action)])
-                dataset = np.append(dataset, [sample_file], axis=0)
+                # 하나의 비디오를 5번 랜덤 샘플링
+                for i in range(5):
+                    sample_file = smp.randSample20(file)
+                    # 샘플링한 20프레임의 데이터를 하나로 펼침
+                    sample_file = sample_file.flatten()
+                    # 데이터 마지막에 라벨링 추가
+                    sample_file = np.concatenate(
+                        [sample_file, makelabel(action)])
+                    dataset = np.append(dataset, [sample_file], axis=0)
 
-            #file = file.flatten()
-            #file = np.concatenate([file, makelabel(action)])
-            #dataset = np.append(dataset, [file], axis=0)
+            else:
+                # 그냥 30프레임 전부 사용
+                file = file.flatten()
+                file = np.concatenate([file, makelabel(action)])
+                dataset = np.append(dataset, [file], axis=0)
 
     dataset = np.delete(dataset, (0), axis=0)
     print(actions)
+    print(config['seq_length'])
     print(dataset.shape)
-    np.savetxt('mydataset_v3_valid.csv', dataset, delimiter=",", fmt='%.5f')
+    np.savetxt('mydataset_v3_valid_{}frames.csv'.format(
+        config['seq_length']), dataset, delimiter=",", fmt='%.5f')
 
 
 def main():

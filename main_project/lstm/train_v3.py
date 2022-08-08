@@ -16,8 +16,8 @@ model_name = 'model_mk6'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # 데이터 셋 설정
-train_dataset = MyDataset('mydataset_v3_train.csv')
-validation_dataset = MyDataset('mydataset_v3_valid.csv')
+train_dataset = MyDataset('mydataset_v3_train_30frames.csv')
+validation_dataset = MyDataset('mydataset_v3_valid_30frames.csv')
 """dataset_size = len(dataset)
 train_size = int(dataset_size * 0.8)
 validation_size = dataset_size - train_size
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     since = time.time()
 
     print(pytorch_model_summary.summary(
-        model, torch.zeros(1, 20, 88), show_input=False))
+        model, torch.zeros(1, config['seq_length'], config['data_dim']), show_input=False))
 
     for epoch in range(1, epochs + 1):
         epoch_start = time.time()
