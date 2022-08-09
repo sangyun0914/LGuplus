@@ -5,20 +5,19 @@ import count
 from count import action_count_length
 from extract_v3 import getParts
 
-seq_length = config['seq_length']
 data_dim = config['data_dim']
+seq_length = config['seq_length']
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 
-model_path = '/Users/jaejoon/LGuplus/main_project/lstm/model/model_mk10_20frame_8.5_100_0.0104_0.0005.pt'
-
-
-def initModel(model_path):
+def initModel(model_name):
+    model_path = os.path.join(
+        '/Users/jaejoon/LGuplus/main_project/lstm/model', model_name)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = torch.load(model_path, map_location=device)
     print(model)
-    print('model initialization complete')
+    print('\nModel Initialization Succeeded!\n')
     return model
 
 
@@ -37,12 +36,14 @@ def testModel(model, test_data):
     return out[out.numpy().argmax()], actions[out.numpy().argmax()]
 
 
-def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카운트한 액션을 순서대로 리스트에 넣어서 반환해줌
+# 비디오를 인풋으로 받아서 카운트한 액션을 순서대로 리스트에 넣어서 반환해줌
+def getActionSequence(video, model):
     extract = np.empty((1, data_dim))
     action_count = []
     action_sequence = []
 
-    print('testing')
+    _fpss = np.array([])
+
     cap = cv2.VideoCapture(video)
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         i = 0
@@ -52,7 +53,7 @@ def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카�
             start_t = timeit.default_timer()
             success, image = cap.read()
             if not success:
-                print(video, 'test complete')
+                print(video)
                 break
 
             # 미디어파이프를 이용하여 스켈레톤 추출
@@ -82,6 +83,7 @@ def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카�
 
             if(extract.shape[0] > seq_length):
                 extract = np.delete(extract, (0), axis=0)
+
                 prob, action = testModel(model, torch.Tensor(extract))
                 prob = prob.item()
 
@@ -92,7 +94,6 @@ def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카�
 
                     res, detected_action = count.countAction(action_count)
                     if res:
-                        print(detected_action, 'action detected!')
                         action_sequence.append(detected_action)
 
                     cv2.putText(image, action, (50, 100),
@@ -101,7 +102,7 @@ def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카�
                                 font, 2, (0, 0, 255), 3)
 
             cv2.putText(image, 'squat : {}, lunge : {}, pushup : {}'.format(count.cnt['squat'], count.cnt['lunge'], count.cnt['pushup']),
-                        (0, 600), font, 2, (0, 255, 0), 2)
+                        (50, 800), font, 2, (0, 255, 0), 2)
 
             # fps 계산
             terminate_t = timeit.default_timer()
@@ -116,43 +117,101 @@ def getActionSequence(video, model):  # 비디오를 인풋으로 받아서 카�
                 i = 0
                 sum = 0
             i += 1
-            cv2.putText(image, "FPS : "+SFPS, (640, 60), 0, 1, (255, 0, 0), 3)
+            cv2.putText(image, "FPS : "+SFPS, (800, 100),
+                        font, 2, (255, 0, 0), 3)
+            _fpss = np.append(_fpss, [float(SFPS)])
 
             cv2.imshow('Testing', image)
+            cv2.waitKey(1)
 
     cap.release()
-    return action_sequence
+    _avg_fps = np.average(_fpss)
+    return action_sequence, _avg_fps
 
 
 def getTestLabel(filename):
     label = filename[-7:-4]
-    return list(label)
+    label = list(label)
+    label.insert(0, label[0])
+    label.insert(2, label[2])
+    label.insert(4, label[4])
+    return label
 
 
-def test():
-    model = initModel(model_path)
+def test(model_name):
+    # 총 테스트 비디오 개수
     test_videos_num = 0
+    # 테스트 비디오 중 올바르게 예측한 비디오 개수
     positive = 0
-    test_videos_path = '/Users/jaejoon/LGuplus/main_project/lstm/test_videos'
+
+    # 모델 초기화
+    model = initModel(model_name)
+
+    # 여러가지 모델 비교하기 위한 데이터용 파일
+    test_file = open('test2.csv', 'a', newline='')
+    # 임의의 모델이 어떤 비디오에 대해 어떻게 예측했는지 확인하기 위한 파일
+    model_file = open('{}_{}frame_test2.csv'.format(
+        model_name, seq_length), 'a', newline='')
+    test_wr = csv.writer(test_file)
+    model_wr = csv.writer(model_file)
+
+    # 동영상 별 평균 fps 저장하기위한 리스트
+    fpss = np.array([])
+
+    # 테스트 비디오 위치
+    test_videos_path = '/Users/jaejoon/LGuplus/main_project/lstm/test_videos2'
     for filename in os.listdir(test_videos_path):
+        # 운동 카운트 리셋
+        count.resetCnt()
+
+        result = None
         test_videos_num += 1
+
         video_path = os.path.join(test_videos_path, filename)
+        # 비디오 파일명에서 라벨 추출
         label = getTestLabel(filename)
-        predicted = getActionSequence(video_path, model)
 
-        print('label :', label, 'model prediction :', predicted)
+        # 비디오에서 액션 시퀀스, fps 추출
+        predicted, fps = getActionSequence(video_path, model)
+        fpss = np.append(fpss, [fps])
 
+        print('label :', label)
+        print('model :', predicted)
+
+        # 추출한 액션 시퀀스가 라벨과 동일한지 비교
         if predicted == label:
             positive += 1
-            print('True')
+            result = 'True'
+            print('=> True\n')
         else:
-            print('False')
+            result = 'False'
+            print('=> False\n')
 
-    print(positive, test_videos_num, positive/test_videos_num)
+        # 비디오 파일명, fps, 모델이 예측한 액션 시퀀스, 맞았는지 틀렸는지 여부
+        model_wr.writerow([filename, int(fps), predicted, result])
+
+    # 모델의 평균 fps
+    avg_fps = int(np.average(fpss))
+    # 전체 동영상 중 맞춘 동영상 비율
+    accuracy = int((positive/test_videos_num) * 100)
+
+    print('test accuracy : {}%'.format(accuracy))
+    test_wr.writerow([model_name, str(accuracy)+'%',
+                     str(avg_fps)+'fps', seq_length])
+
+    model_file.close()
+    test_file.close()
 
 
 def main():
-    test()
+    # 테스트할 모델 파일들이 있는 디렉토리
+    models_path = '/Users/jaejoon/LGuplus/main_project/lstm/model/for_test'
+    # 여러 모델에 대해서 테스트 수행
+    for model_name in os.listdir(models_path):
+        print('\n'+model_name)
+        # 현재 테스트 중인 모델에 몇 프레임이 들어가고 있는지 표시
+        print('sequence length :', seq_length, '\n')
+        test(model_name)
 
 
 if __name__ == '__main__':

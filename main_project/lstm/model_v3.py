@@ -1,15 +1,18 @@
 from matplotlib.pyplot import axis
 from configs import *
 
-seq_length = config['seq_length']
-data_dim = config['data_dim']
-
 # 왼쪽 팔, 오른쪽 팔, 왼쪽 다리, 오른쪽 다리 각각 나눠서 처리하는 모델
+
+layers = config['lstm_layers']
+data_dim = config['data_dim']
+seq_length = config['seq_length']
+dropout = config['dropout']
 
 
 class Model(nn.Module):
-    def __init__(self, layers, dropout):
+    def __init__(self):
         super(Model, self).__init__()
+
         self.lstm1 = nn.LSTM(22, 10,
                              num_layers=layers, batch_first=True, bias=True, dropout=dropout)
         self.lstm2 = nn.LSTM(22, 10,
@@ -30,7 +33,6 @@ class Model(nn.Module):
 
     def forward(self, x):
         x = x.view([-1, seq_length, data_dim])
-        # print(x.shape)
 
         left_upper_data = x[:, :, 0:22]
         right_upper_data = x[:, :, 22:44]
