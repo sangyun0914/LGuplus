@@ -15,19 +15,12 @@ mp_pose = mp.solutions.pose
 dictEval = {"5":"Bad", "6":"Normal", "7":"Good"}
 
 def findAngle(x1, y1, x2, y2, cx, cy):
-  division_degree_first = x2-cx
-  if (division_degree_first <= 0):
-    division_degree_first= 1
-
-  division_degree_second = x1-cx
-  if (division_degree_second <= 0):
-    division_degree_second= 1
-
-  theta = math.atan((y2-cy)/division_degree_first)-math.atan((y1-cy)/division_degree_second)
-  degree = int(180/math.pi)*abs(theta)
-
-  print(degree)
-  return degree
+  try:
+    theta = math.atan((y2-cy)/(x2-cx))-math.atan((y1-cy)/(x1-cx))
+    degree = int(180/math.pi)*abs(theta)
+    return degree
+  except:
+    return 0
 
 def EvalulateSquatPose(image,landmark_pose):
   image_height, image_width, _ = image.shape 
@@ -101,40 +94,62 @@ def EvalulateSquatPose(image,landmark_pose):
   ROW_HIP_X = CENTER_HIP_X
   ROW_HIP_Y = LEFT_KNEE
 
+  degreeOfLeftLeg = 0
+  degreeOfRightLeg = 0
+  degreeOfLeftWaist = 0
+  degreeOfRightWaist = 0
+
   try:
     degreeOfLeftLeg= int(findAngle(LEFT_ANKLE_X,LEFT_ANKLE_Y,LEFT_HIP_X,LEFT_HIP_Y,LEFT_KNEE_X,LEFT_KNEE_Y))
     degreeOfRightLeg = int(findAngle(RIGHT_ANKLE_X,RIGHT_ANKLE_Y,RIGHT_HIP_X,RIGHT_HIP_Y,RIGHT_KNEE_X,RIGHT_KNEE_Y))
-    degreeOfWaist = int(findAngle(CENTER_SHOULDER_X,CENTER_SHOULDER_Y,ROW_HIP_X,ROW_HIP_Y,CENTER_HIP_X,CENTER_HIP_Y,))
+    degreeOfLeftWaist = int(findAngle(LEFT_SHOULDER_X,LEFT_SHOULDER_Y,LEFT_HIP_X,LEFT_HIP_Y-5,LEFT_HIP_X,LEFT_HIP_Y))
+    degreeOfRightWaist = int(findAngle(RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y,RIGHT_HIP_X,RIGHT_HIP_Y-5,RIGHT_HIP_X,RIGHT_HIP_Y))
   except:
     pass
   # left = 0
   # right = 0
+  try:
+    if (degreeOfLeftWaist):
+      if (degreeOfLeftWaist>=175):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist down! {}".format(degreeOfLeftWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
 
-  if (degreeOfWaist>=175):
-    cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
-    cv2.putText(image, "Waist down! {}".format(degreeOfWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+      elif (degreeOfLeftWaist<175 and degreeOfLeftWaist>=100):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,255,0), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist GOOD {}".format(degreeOfLeftWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+      elif (degreeOfLeftWaist<100):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist up! {}".format(degreeOfLeftWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+    
+    if (degreeOfRightWaist):
+      if (degreeOfRightWaist>=175):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist down! {}".format(degreeOfRightWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
 
-  elif (degreeOfWaist<175 and degreeOfWaist>=100):
-    cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,255,0), 3, cv2.LINE_AA)
-    cv2.putText(image, "Waist GOOD {}".format(degreeOfWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-  elif (degreeOfWaist<100):
-    cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
-    cv2.putText(image, "Waist up! {}".format(degreeOfWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+      elif (degreeOfRightWaist<175 and degreeOfRightWaist>=100):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,255,0), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist GOOD {}".format(degreeOfRightWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+      elif (degreeOfRightWaist<100):
+        cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
+        cv2.putText(image, "Waist up! {}".format(degreeOfRightWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
 
-  if (degreeOfLeftLeg >= 140):
-    cv2.putText(image, "Bad" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
-  elif (degreeOfLeftLeg<140 and degreeOfLeftLeg>=80):
-    cv2.putText(image, "Normal" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
-  else:
-    cv2.putText(image, "Good" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+    if (degreeOfLeftLeg):
+      if (degreeOfLeftLeg >= 120):
+        cv2.putText(image, "Bad" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+      elif (degreeOfLeftLeg<120 and degreeOfLeftLeg>=80):
+        cv2.putText(image, "Normal" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
+      else:
+        cv2.putText(image, "Good" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
 
-  if (degreeOfRightLeg >= 140):
-    cv2.putText(image, "Bad" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
-  elif (degreeOfRightLeg<140 and degreeOfRightLeg>=80):
-    cv2.putText(image, "Normal" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
-  else:
-    cv2.putText(image, "Good" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-
+    if (degreeOfRightLeg):
+      if (degreeOfRightLeg >= 120):
+        cv2.putText(image, "Bad" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+      elif (degreeOfRightLeg<120 and degreeOfRightLeg>=80):
+        cv2.putText(image, "Normal" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
+      else:
+        cv2.putText(image, "Good" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+  except:
+    pass
   # cv2.putText(image, "{}".format(degreeOfLeftLeg) , (LEFT_KNEE_X-5,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
   # cv2.putText(image, "{}".format(degreeOfRightLeg) , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
 
@@ -142,4 +157,3 @@ def EvalulateSquatPose(image,landmark_pose):
   #   cv2.putText(image, "leg -> {} squat".format(str(dictEval[str(left)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
   # else:
   #   cv2.putText(image, "leg -> {} squat".format(str(dictEval[str(right)])) , (50,300), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-  print("ERROR")

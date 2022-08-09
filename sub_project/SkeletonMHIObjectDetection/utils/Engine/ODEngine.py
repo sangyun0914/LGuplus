@@ -14,6 +14,8 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import math
+import utils.Const.const as const
+import utils.Dictionary as Dictionary
 
 from zmq import PUSH
 
@@ -621,134 +623,139 @@ NumPushup = 0
 
 actionList = [("stand",5),("stand",5),("stand",5)]
 
-cap = cv2.VideoCapture("TestVideo/202208021432_original_SPL.avi")
+cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture(0)
 # wake up
-# StartEngine(cap)
-# detection
-with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
-  previous = "stand"
-  Current = "stand"
-  frame_count = 0
-  while cap.isOpened():
-      ret, frame = cap.read()
-      frame_count += 1
-      image_height, image_width, _ = frame.shape
+StartEngine(cap)
 
-      cv2.imshow('Original',frame)
+def ODEngine(cap):
+  predict_str = ""
+  # detection
+  with mp_pose.Pose(min_detection_confidence=0.8,min_tracking_confidence=0.5) as pose:
+    previous = "stand"
+    Current = "stand"
+    frame_count = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        frame_count += 1
+        image_height, image_width, _ = frame.shape
 
-      frame.flags.writeable = False
-      frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-      results = pose.process(frame)
+        cv2.imshow('Original',frame)
 
-      frame.flags.writeable = True
-      if results.pose_landmarks:
-        landmark_pose = results.pose_landmarks.landmark
+        frame.flags.writeable = False
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = pose.process(frame)
+        XMax,XMin,YMax,YMin = CropImages()
+        crop = frame[YMin:YMax, XMin:XMax] #세로로 100-200까지, 가로로 200-400까지 자름
 
-        frame = InsertCoordinate(frame,landmark_pose)
-        frame = cv2.resize(frame, None, fx=0.25 , fy=0.25) #0.5배로 축소
-        results_yolo = model(frame)
+        frame.flags.writeable = True
+        if results.pose_landmarks:
+          landmark_pose = results.pose_landmarks.landmark
 
-        labels, cord = results_yolo.xyxyn[0][:, -1], results_yolo.xyxyn[0][:, :-1]
-        n = len(labels)
+          frame = InsertCoordinate(frame,landmark_pose)
+          frame = cv2.resize(frame, None, fx=0.25 , fy=0.25) #0.5배로 축소
+          results_yolo = model(frame)
 
-        x_shape, y_shape = frame.shape[1], frame.shape[0]
+          labels, cord = results_yolo.xyxyn[0][:, -1], results_yolo.xyxyn[0][:, :-1]
+          n = len(labels)
 
-        squat, stand, lunge, lying, pushup = 0,0,0,0,0
-        SQUAT, STAND, LUNGE, LYING, PUSHUP = 15,19,16,17,18
+          x_shape, y_shape = frame.shape[1], frame.shape[0]
 
-        action = "None"
-        dictInfor = {"squat":0, "stand":0, "lunge":0, "lying":0, "pushup":0}
+          squat, stand, lunge, lying, pushup = 0,0,0,0,0
+          SQUAT, STAND, LUNGE, LYING, PUSHUP = 15,19,16,17,18
 
-        for i in range(n):
-            row = cord[i]
-            if row[4] >= 0.5:
-                
-                x1, y1, x2, y2 = int(row[0]*x_shape), int(row[1]*y_shape), int(row[2]*x_shape), int(row[3]*y_shape)
-                # if (x2-x2 < 30 or y2-y1<30):
-                #   continue
-                # print('width : {} | height : {}'.format(x2-x1,y2-y1))
-                
-                bgr = (0, 255, 0)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
+          action = "None"
+          dictInfor = {"squat":0, "stand":0, "lunge":0, "lying":0, "pushup":0}
 
-                if (labels[i] == SQUAT):
-                  dictInfor["squat"] += 1
-                
-                if (labels[i] == STAND):
-                  dictInfor["stand"] += 1
+          for i in range(n):
+              row = cord[i]
+              if row[4] >= 0.5:
+                  
+                  x1, y1, x2, y2 = int(row[0]*x_shape), int(row[1]*y_shape), int(row[2]*x_shape), int(row[3]*y_shape)
+                  # if (x2-x2 < 30 or y2-y1<30):
+                  #   continue
+                  # print('width : {} | height : {}'.format(x2-x1,y2-y1))
+                  
+                  bgr = (0, 255, 0)
+                  cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 2)
 
-                if (labels[i] == LUNGE):
-                  dictInfor["lunge"] += 1
+                  if (labels[i] == SQUAT):
+                    dictInfor["squat"] += 1
+                  
+                  if (labels[i] == STAND):
+                    dictInfor["stand"] += 1
 
-                if (labels[i] == LYING):
-                  dictInfor["lying"] += 1
+                  if (labels[i] == LUNGE):
+                    dictInfor["lunge"] += 1
 
-                if (labels[i] == PUSHUP):
-                  dictInfor["pushup"] += 1
+                  if (labels[i] == LYING):
+                    dictInfor["lying"] += 1
 
-        action = max(dictInfor, key = dictInfor.get)
-        
-        # if (action != actionList[0][0]):
-        #   actionList.pop(len(actionList)-1)
-        #   actionList.insert(0,(str(action),int(0)))
+                  if (labels[i] == PUSHUP):
+                    dictInfor["pushup"] += 1
 
-        # else:
-        #   getAction = str(actionList[0][0])
-        #   getFrameCount = int(actionList[0][1])
-        #   getFrameCount += 1
-        #   actionList.pop(0)
+          action = max(dictInfor, key = dictInfor.get)
+          
+          # if (action != actionList[0][0]):
+          #   actionList.pop(len(actionList)-1)
+          #   actionList.insert(0,(str(action),int(0)))
 
-        #   actionList.insert(0,(str(getAction),int(getFrameCount)))
-        
-        # print(actionList)
-        # print(actionList[1][0])
-        # print(actionList[2][0]
+          # else:
+          #   getAction = str(actionList[0][0])
+          #   getFrameCount = int(actionList[0][1])
+          #   getFrameCount += 1
+          #   actionList.pop(0)
 
-        # try:
-        #   FrameCountIndex1 = int(actionList[1][1])
-        #   if (FrameCountIndex1 < 2):
-        #     actionList.pop(1)
-        # except:
-        #   pass
+          #   actionList.insert(0,(str(getAction),int(getFrameCount)))
+          
+          # print(actionList)
+          # print(actionList[1][0])
+          # print(actionList[2][0]
 
-        # try:
-        #   FrameCountIndex2 = int(actionList[2][1])
-        #   if (FrameCountIndex2 < 2):
-        #     actionList.pop(2)
-        # except:
-        #   pass
-        Current = action
-        # print(actionList)
+          # try:
+          #   FrameCountIndex1 = int(actionList[1][1])
+          #   if (FrameCountIndex1 < 2):
+          #     actionList.pop(1)
+          # except:
+          #   pass
 
-        frame = cv2.resize(frame, None, fx=4 , fy=4) #다시 확대
+          # try:
+          #   FrameCountIndex2 = int(actionList[2][1])
+          #   if (FrameCountIndex2 < 2):
+          #     actionList.pop(2)
+          # except:
+          #   pass
+          cur = action
+          doAction = ""
+          if (cur == const.STAND_STRING or cur == const.LYINGE_STRING):
+            doAction = Dictionary.EvaluateDictAction(dict,cur)
+            dict = Dictionary.initDict()
+          else:
+            Dictionary.IncreaseDict(dict,cur)
 
-        doAction = ActionPerformed(previous,Current)
+          if (doAction == const.SQUAT_STRING):
+                predict = predict+"S"
 
-        if (doAction == SQUAT):
-          NumSquat += 1
-        elif (doAction == LUNGE):
-          NumLunge += 1
-        elif (doAction == PUSHUP):
-          NumPushup += 1
-        
-        squat_left,squat_right = EvalulateSquatPose(frame,landmark_pose)
-        dictEval = {"6":"Bad", "5":"Normal", "4":"GOOD"}
-        if (action == "squat"):
-          cv2.putText(frame, "Action : {}".format(str(dictEval[str(squat_right)])+" "+ action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        else:
-          cv2.putText(frame, "Action : {}".format(action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        cv2.putText(frame, "Squat: {}".format(str(NumSquat)) , (100,150), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        cv2.putText(frame, "Lunge: {}".format(str(NumLunge)) , (100,200), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        cv2.putText(frame, "Pushup: {}".format(str(NumPushup)) , (100,250), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-        previous = Current
-        
+          elif (doAction == const.LUNGE_STRING):
+            predict = predict+"L"
 
-      cv2.imshow('skeletonMHI', frame)
+          elif (doAction == const.PUSHUP_STRING):
+            predict = predict+"P"
+          dictEval = {"6":"Bad", "5":"Normal", "4":"GOOD"}
+          if (action == "squat"):
+            cv2.putText(frame, "Action : {}".format(str(dictEval[str(squat_right)])+" "+ action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+          else:
+            cv2.putText(frame, "Action : {}".format(action) , (100,100), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+          cv2.putText(frame, "Squat: {}".format(str(NumSquat)) , (100,150), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+          cv2.putText(frame, "Lunge: {}".format(str(NumLunge)) , (100,200), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+          cv2.putText(frame, "Pushup: {}".format(str(NumPushup)) , (100,250), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+          
 
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        cv2.imshow('skeletonMHI', frame)
 
-cap.release()
-cv2.destroyAllWindows()
-cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+          break
+
+    cap.release()
+    cv2.destroyAllWindows()
+  return predict_str

@@ -8,10 +8,8 @@ import warnings
 import math
 import sys
 import os
-import timeit
 
 from utils.Dictionary.initDict import initDict
-import utils.Draw as Draw
 #from ..EvaluatePose import EvaluateSquatPose as esp
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
@@ -46,7 +44,7 @@ def ActionPerformed(prev,cur):
 def InferenceEngine(cap,MODEL):
   NumSquat,NumLunge,NumPushup = 0,0,0
   dict = Dictionary.initDict()
-  
+
   with open(MODEL, 'rb') as f:
     model = pickle.load(f)
   
@@ -62,7 +60,7 @@ def InferenceEngine(cap,MODEL):
             
             if (ret == False):
               break
-            start_t = timeit.default_timer()
+
             # Recolor Feed
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False        
@@ -77,10 +75,12 @@ def InferenceEngine(cap,MODEL):
             image.flags.writeable = True   
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-            # try:
-            image = Draw.DrawSkeleton(image,results.pose_landmarks.landmark)
-            # except:
-            #   pass
+            mp_drawing.draw_landmarks(
+              image,
+              results.pose_landmarks,
+              mp_pose.POSE_CONNECTIONS,
+              landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+
             # Export coordinates
             # try:
             if results.pose_world_landmarks:
@@ -89,8 +89,7 @@ def InferenceEngine(cap,MODEL):
               X = pd.DataFrame([row])
               body_language_class = model.predict(X)[0]
               body_language_prob = model.predict_proba(X)[0]
-              terminate_t = timeit.default_timer()
-              FPS_realtime = int(1./(terminate_t - start_t ))
+              
               # # Posture Recognition
               # if (body_language_class == "stand"):
               #   with mp_hands.Hands(model_complexity=0,min_detection_confidence=0.5,min_tracking_confidence=0.5) as hands:
@@ -99,12 +98,12 @@ def InferenceEngine(cap,MODEL):
               cur = body_language_class
               
               # Workout assist program
-              if (cur == const.SQUAT_STRING):
-                esp.EvalulateSquatPose(image,results.pose_landmarks.landmark)
-              elif (cur == const.LUNGE_STRING):
-                elp.EvalulateLungePose(image,results.pose_landmarks.landmark)
-              elif (cur == const.PUSHUP_STRING):
-                epp.EvalulatePushUpPose(image,results.pose_landmarks.landmark)
+              # if (cur == const.SQUAT_STRING):
+              #   esp.EvalulateSquatPose(image,results.pose_landmarks.landmark)
+              # elif (cur == const.LUNGE_STRING):
+              #   pass
+              # elif (cur == const.PUSHUP_STRING):
+              #   pass
               
               # Eval count
               doAction = ""
@@ -123,10 +122,15 @@ def InferenceEngine(cap,MODEL):
               elif (doAction == const.PUSHUP_STRING):
                 NumPushup = IncreaseNum(NumPushup)
 
+              print(dict)
               # Get status box
-              cv2.rectangle(image, (0,0), (250, 500), (245, 117, 16), -1)
+              cv2.rectangle(image, (0,0), (250, 60), (245, 117, 16), -1)
+              
+              # Display Class
+              cv2.putText(image, 'action'
+                          , (95,12), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 1, cv2.LINE_AA)
               cv2.putText(image, body_language_class.split(' ')[0]
-                          , (50,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                          , (90,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
               
               # Display Probability
               # cv2.putText(image, 'prob'
@@ -134,10 +138,10 @@ def InferenceEngine(cap,MODEL):
               # cv2.putText(image, str(round(body_language_prob[np.argmax(body_language_prob)],2))
               #             , (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-              cv2.putText(image, "Squat  {}".format(str(NumSquat)) , (50,100), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "Lunge  {}".format(str(NumLunge)) , (50,150), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "Pushup {}".format(str(NumPushup)) , (50,200), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "fps {}".format(str(FPS_realtime)),(50,250), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
+              cv2.putText(image, "Squat  {}".format(str(NumSquat)) , (50,150), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+              cv2.putText(image, "Lunge  {}".format(str(NumLunge)) , (50,200), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+              cv2.putText(image, "Pushup {}".format(str(NumPushup)) , (50,250), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
+
             cv2.imshow('Skeleton Action Classifier', image)
 
             if cv2.waitKey(10) & 0xFF == ord('q'):

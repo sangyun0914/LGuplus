@@ -1,4 +1,3 @@
-from cv2 import exp
 import mediapipe as mp # Import mediapipe
 import cv2 # Import opencv
 import numpy as np
@@ -73,32 +72,9 @@ def EvalulatePushUpPose(image,landmark_pose):
     RIGHT_ELBOW_X = 1
     RIGHT_ELBOW_Y = 1
 
-  degreeOfLeftArm = 0
-  degreeOfRightArm = 0
-  try:
-    degreeOfLeftArm = int(findAngle(LEFT_WRIST_X,LEFT_WRIST_Y,LEFT_SHOULDER_X,LEFT_SHOULDER_Y,LEFT_ELBOW_X,LEFT_ELBOW_Y))
-    degreeOfRightArm = int(findAngle(RIGHT_WRIST_X,RIGHT_WRIST_Y,RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y,RIGHT_ELBOW_X,RIGHT_ELBOW_Y))
-  except:
-    pass
+  degreeOfLeftArm = int(findAngle(LEFT_WRIST_X,LEFT_WRIST_Y,LEFT_SHOULDER_X,LEFT_SHOULDER_Y,LEFT_ELBOW_X,LEFT_ELBOW_Y))
+  degreeOfRightArm = int(findAngle(RIGHT_WRIST_X,RIGHT_WRIST_Y,RIGHT_SHOULDER_X,RIGHT_SHOULDER_Y,RIGHT_ELBOW_X,RIGHT_ELBOW_Y))
 
-  try:
-    if (degreeOfLeftArm):
-      if (degreeOfLeftArm >= 120):
-        cv2.putText(image, "Bad" , (LEFT_ELBOW_X-5,LEFT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
-      elif (degreeOfLeftArm<120 and degreeOfLeftArm>=90):
-        cv2.putText(image, "go Down" , (LEFT_ELBOW_X-5,LEFT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
-      else:
-        cv2.putText(image, "Good" , (LEFT_ELBOW_X-5,LEFT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-
-    if (degreeOfRightArm):
-      if (degreeOfRightArm >= 120):
-        cv2.putText(image, "Bad" , (RIGHT_ELBOW_X-5,RIGHT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
-      elif (degreeOfRightArm<120 and degreeOfRightArm>=90):
-        cv2.putText(image, "go Down" , (RIGHT_ELBOW_X-5,RIGHT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
-      else:
-        cv2.putText(image, "Good" , (RIGHT_ELBOW_X-5,RIGHT_ELBOW_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
-  except:
-    pass
   # resultOfSquat_left = 0
   # resultOfSquat_right = 0
 
