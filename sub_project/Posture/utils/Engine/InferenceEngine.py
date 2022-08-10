@@ -20,6 +20,7 @@ from EvaluatePose import EvaluatePushUpPose as epp
 from EvaluatePose import EvaluateSquatPose as esp
 from Const import const
 import Dictionary
+import MSE
 
 mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
@@ -66,7 +67,7 @@ def InferenceEngine(cap,MODEL):
             # Recolor Feed
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False        
-            
+            height, width, shape  = image.shape
             # Make Detections
             results = pose.process(image)
             # print(results.face_landmarks)
@@ -101,10 +102,13 @@ def InferenceEngine(cap,MODEL):
               # Workout assist program
               if (cur == const.SQUAT_STRING):
                 esp.EvalulateSquatPose(image,results.pose_landmarks.landmark)
+                MSE.SquatMSE(image,row)
               elif (cur == const.LUNGE_STRING):
                 elp.EvalulateLungePose(image,results.pose_landmarks.landmark)
+                MSE.LungeMSE(image,row)
               elif (cur == const.PUSHUP_STRING):
                 epp.EvalulatePushUpPose(image,results.pose_landmarks.landmark)
+                MSE.PushupMSE(image,row)
               
               # Eval count
               doAction = ""
@@ -124,9 +128,9 @@ def InferenceEngine(cap,MODEL):
                 NumPushup = IncreaseNum(NumPushup)
 
               # Get status box
-              cv2.rectangle(image, (0,0), (250, 500), (245, 117, 16), -1)
+              cv2.rectangle(image, (0,0), (240,height), (245, 117, 16), -1)
               cv2.putText(image, body_language_class.split(' ')[0]
-                          , (50,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                          , (80,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
               
               # Display Probability
               # cv2.putText(image, 'prob'
@@ -134,11 +138,30 @@ def InferenceEngine(cap,MODEL):
               # cv2.putText(image, str(round(body_language_prob[np.argmax(body_language_prob)],2))
               #             , (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-              cv2.putText(image, "Squat  {}".format(str(NumSquat)) , (50,100), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "Lunge  {}".format(str(NumLunge)) , (50,150), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "Pushup {}".format(str(NumPushup)) , (50,200), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-              cv2.putText(image, "fps {}".format(str(FPS_realtime)),(50,250), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
-            cv2.imshow('Skeleton Action Classifier', image)
+              cv2.putText(image, "Squat  {}".format(str(NumSquat)) , (50,120), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+              cv2.putText(image, "Lunge  {}".format(str(NumLunge)) , (50,170), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+              cv2.putText(image, "Pushup {}".format(str(NumPushup)) , (50,220), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+              if (cur == const.SQUAT_STRING):
+                MSE.SquatMSE(image,row)
+              elif (cur == const.LUNGE_STRING):
+                MSE.LungeMSE(image,row)
+              elif (cur == const.PUSHUP_STRING):
+                MSE.PushupMSE(image,row)
+              
+              cv2.rectangle(image, (0,60), (240, 65), (255, 255, 255), -1)
+              remain = height - 300
+              remain = int(remain/4)
+              start_y = 275 - remain
+              # for i in range(4):
+              #   start_y += remain
+              #   cv2.rectangle(image, (0,start_y), (240, start_y+5), (255, 255, 255), -1)
+              # cv2.rectangle(image, (0,280), (240, 315), (255, 255, 255), -1)
+              # cv2.rectangle(image, (0,345), (240, 350), (255, 255, 255), -1)
+              # cv2.rectangle(image, (0,380), (240, 385), (255, 255, 255), -1)
+
+              # cv2.putText(image, "fps {}".format(str(FPS_realtime)),(50,250), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0), 2)
+            cv2.imshow('Health Assist', image)
 
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break

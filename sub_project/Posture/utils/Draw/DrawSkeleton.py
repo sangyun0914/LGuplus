@@ -9,7 +9,7 @@ mp_pose = mp.solutions.pose
 
 def DrawSkeleton(image,landmark_pose):
   image_height, image_width, _ = image.shape 
-  COLOR = (0,255,255)
+  COLOR = (203, 192, 255)
   RIGHT_SHOULDER = landmark_pose[12]
   RIGHT_SHOULDER_X = int(RIGHT_SHOULDER.x * image_width)
   RIGHT_SHOULDER_Y = int(RIGHT_SHOULDER.y * image_height)
