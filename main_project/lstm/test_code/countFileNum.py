@@ -5,6 +5,15 @@ from numpy import percentile
 actions = ['squat-down', 'squat-up', 'pushup-down',
            'pushup-up', 'lunge-down', 'lunge-up', 'stand', 'stand2push', 'push2stand']
 
+print('model test dataset')
+for action in actions:
+    cnt = 0
+    for filename in os.listdir("../videos/model_test_videos/{}".format(action)):
+        if filename.endswith('.DS_Store'):
+            continue
+        cnt += 1
+    print(action, cnt)
+
 train = []
 print('training dataset')
 for action in actions:
