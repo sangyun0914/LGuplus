@@ -13,18 +13,12 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 def findAngle(x1, y1, x2, y2, cx, cy):
-  division_degree_first = x2-cx
-  if (division_degree_first <= 0):
-    division_degree_first= 1
-
-  division_degree_second = x1-cx
-  if (division_degree_second <= 0):
-    division_degree_second= 1
-
-  theta = math.atan((y2-cy)/division_degree_first)-math.atan((y1-cy)/division_degree_second)
-  degree = int(180/math.pi)*abs(theta)
-
-  return degree
+  try:
+    theta = math.atan((y2-cy)/(x2-cx))-math.atan((y1-cy)/(x1-cx))
+    degree = int(180/math.pi)*abs(theta)
+    return degree
+  except:
+    return 0
 
 def EvalulateLungePose(image,landmark_pose):
   image_height, image_width, _ = image.shape 
@@ -123,12 +117,12 @@ def EvalulateLungePose(image,landmark_pose):
         cv2.putText(image, "GOOD {}".format(degreeOfLeftWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
       elif (degreeOfLeftWaist<80):
         cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
-        cv2.putText(image, "Waist up! {}".format(degreeOfLeftWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+        cv2.putText(image, "Waist up!" , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
     
     if (degreeOfRightWaist):
       if (degreeOfRightWaist>100):
         cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,0,255), 3, cv2.LINE_AA)
-        cv2.putText(image, "Waist down! {}".format(degreeOfRightWaist) , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+        cv2.putText(image, "Waist down!" , (CENTER_X,CENTER_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
 
       elif (degreeOfRightWaist<=80 and degreeOfRightWaist>=100):
         cv2.line(image, (CENTER_SHOULDER_X , CENTER_SHOULDER_Y) , (CENTER_HIP_X, CENTER_HIP_Y), (0,255,0), 3, cv2.LINE_AA)
@@ -139,18 +133,18 @@ def EvalulateLungePose(image,landmark_pose):
 
     if (degreeOfLeftLeg):
       if (degreeOfLeftLeg >= 100):
-        cv2.putText(image, "Keep leg close to 90degree" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+        cv2.putText(image, degreeOfLeftLeg , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
       elif (degreeOfLeftLeg<80 and degreeOfLeftLeg>=100):
         cv2.putText(image, "Good" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
       else:
-        cv2.putText(image, "Keep leg close to 90degree" , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
+        cv2.putText(image, degreeOfLeftLeg , (LEFT_KNEE_X,LEFT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
 
     if (degreeOfRightLeg):
       if (degreeOfRightLeg >= 100):
-        cv2.putText(image, "Keep leg close to 90degree" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
+        cv2.putText(image, degreeOfRightLeg , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,0,255), 3)
       elif (degreeOfRightLeg<80 and degreeOfRightLeg>=100):
         cv2.putText(image, "Good" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,0), 3)
       else:
-        cv2.putText(image, "Keep leg close to 90degree" , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
+        cv2.putText(image, degreeOfRightLeg , (RIGHT_KNEE_X-5,RIGHT_KNEE_Y), cv2.FONT_HERSHEY_PLAIN, 3, (0,255,255), 3)
   except:
     pass
