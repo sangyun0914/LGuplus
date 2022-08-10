@@ -30,7 +30,7 @@ def getParts(temp, angles):
     return temp2
 
 
-def extractPoseV3(video_path, video_name, csv_path, degree):
+def extractPoseV3(action, video_path, video_name, csv_path, degree):
     # 프레임마다 뽑힌 스켈레톤 좌표를 하나로 모으기 위하여 비어있는 넘파이 배열 생성
     # 파트 하나당 feature 총 22개, 파트가 4개이므로 총 88개
     # 하나의 비디오 -> (30, 88)의 넘파이 배열로 추출
@@ -45,7 +45,7 @@ def extractPoseV3(video_path, video_name, csv_path, degree):
             success, image = cap.read()
             if not success:
                 print("Action : {0} / filename : {1} / Skeleton Extraction Finished".format(
-                    csv_path[11:-4], video_name))
+                    action, video_name))
                 break
 
             if degree == 90:
@@ -85,12 +85,13 @@ def main():
     # degrees = [0, 90, 270]
     degrees = [0]
     # 지정한 운동들을 스켈레톤 추출하여 저장
-    for action in actions:
-        for filename in os.listdir("./videos/{0}".format(action)):
+    '''for action in actions:
+        for filename in os.listdir("./videos/model_test_videos/{0}".format(action)):
             if filename.endswith('.DS_Store'):
                 continue
-            video_path = os.path.join("./videos/{0}".format(action), filename)
-            csv_path = os.path.join('./csv_part/{0}_csv'.format(action))
+            video_path = os.path.join(
+                "./videos/model_test_videos/{0}".format(action), filename)
+            csv_path = os.path.join('./skeleton_csv/{0}_csv'.format(action))
             for degree in degrees:
                 extractPoseV3(video_path, filename +
                               str(degree), csv_path, degree)
@@ -104,6 +105,18 @@ def main():
             csv_path = os.path.join('./csv_part_valid/{0}_csv'.format(action))
             for degree in degrees:
                 extractPoseV3(video_path, filename +
+                              str(degree), csv_path, degree)'''
+
+    for action in actions:
+        for filename in os.listdir("./videos/model_test_videos/{0}".format(action)):
+            if filename.endswith('.DS_Store'):
+                continue
+            video_path = os.path.join(
+                "./videos/model_test_videos/{0}".format(action), filename)
+            csv_path = os.path.join(
+                './skeleton_csv/csv_modelv3_test/{0}_csv'.format(action))
+            for degree in degrees:
+                extractPoseV3(action, video_path, filename +
                               str(degree), csv_path, degree)
 
 

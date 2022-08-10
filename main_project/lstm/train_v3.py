@@ -18,8 +18,8 @@ model_name = 'model_mk6'
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # 데이터 셋 설정
-train_dataset = MyDataset('mydataset_v3_train_30frames.csv')
-validation_dataset = MyDataset('mydataset_v3_valid_30frames.csv')
+train_dataset = MyDataset('mydataset_v3_train_20frames.csv')
+validation_dataset = MyDataset('mydataset_v3_valid_20frames.csv')
 train_loader = DataLoader(dataset=train_dataset,
                           batch_size=batch_size, shuffle=True)
 validation_loader = DataLoader(

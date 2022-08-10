@@ -6,6 +6,7 @@ output_dim = config['output_dim']
 class MyDataset(Dataset):
     def __init__(self, dataset_file):
         data = np.loadtxt(dataset_file, delimiter=",", dtype=np.float32)
+        print(data.shape)
         self.len = data.shape[0]
         self.x_data = torch.from_numpy(data[:, 0:-output_dim])
         self.y_data = torch.from_numpy(data[:, -output_dim:])
