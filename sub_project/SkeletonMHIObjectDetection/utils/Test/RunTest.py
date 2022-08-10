@@ -1,8 +1,9 @@
-import utils.Engine as Engine
-import utils.Test as Test
-import cv2 # Import opencv
+# import EvalAnswer as EA
+import cv2
 import os
-
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+import Engine
 def EvalAnswer(name):
   if ("SLP") in name:
     return  "SSLLPP"
@@ -17,11 +18,8 @@ def EvalAnswer(name):
   elif ("LPS") in name:
     return "LLPPSS"
 
-if __name__ == "__main__":
-  cur_path = os.getcwd()
-  test_path = Test.ReturnTestPath("TestVideo")
-  test_list = Test.ReturnTestList(test_path)
-  
+# input으로 test_list를 넣어주면 됨
+def RunTest(test_list):
   notcorrect = []
   correct = 0
   for i in test_list:
@@ -30,7 +28,7 @@ if __name__ == "__main__":
     print("CURRENT VIDEO PATH : {}".format(VIDEO_PATH))
     print("===========================================================")
     cap = cv2.VideoCapture(VIDEO_PATH)
-    predict = Engine.TestCNNEngine(cap)
+    predict = Engine.ODEngine(cap)
     print("Answer  is {}".format(EvalAnswer(i)))
     print("Predict is {}".format(predict))
 
