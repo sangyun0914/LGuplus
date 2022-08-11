@@ -53,8 +53,7 @@ cap.release()
 cv2.destroyAllWindows()
 # Thirty videos worth of data
 
-# Videos are going to be 30 frames in length
-sequence_length = 5
+sequence_length = 30
 
 for sequence in range(no_sequences):
     try: 
