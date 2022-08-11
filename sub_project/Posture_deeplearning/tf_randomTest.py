@@ -5,10 +5,9 @@ import cv2 # Import opencv
 import os
 
 if __name__ == "__main__":
-  MODEL = "model/ActionV7_gb.pkl"
+  MODEL = "model/ActionNV2.h5"
   cur_path = os.getcwd()
-  folder_name = "RandomVideo"
-  test_path = Test.ReturnTestPath(folder_name)
+  test_path = Test.ReturnTestPath("RandomVideo")
   print(test_path)
   test_list = Test.ReturnTestList(test_path)
-  RT.RunRandomTest(test_list,MODEL,folder_name)
+  RT.RunRandomTest(test_list,MODEL)

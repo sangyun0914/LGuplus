@@ -7,17 +7,9 @@ mp_selfie_segmentation = mp.solutions.selfie_segmentation
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-# image : openCV frame
-
-# landmark_pose : results.pose_landmarks.landmark
-# [results = pose.process(image)]
-
-# COLOR : skeleton Color -> (ex) (203,192,255)
-def DrawSkeleton(image,landmark_pose,COLOR):
+def DrawSkeleton(image,landmark_pose):
   image_height, image_width, _ = image.shape 
-
   COLOR = (203, 192, 255)
-
   RIGHT_SHOULDER = landmark_pose[12]
   RIGHT_SHOULDER_X = int(RIGHT_SHOULDER.x * image_width)
   RIGHT_SHOULDER_Y = int(RIGHT_SHOULDER.y * image_height)
