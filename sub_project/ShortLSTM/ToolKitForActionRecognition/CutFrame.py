@@ -53,8 +53,7 @@ cap.release()
 cv2.destroyAllWindows()
 # Thirty videos worth of data
 
-# Videos are going to be 30 frames in length
-sequence_length = 5
+sequence_length = 30
 
 for sequence in range(no_sequences):
     try: 
@@ -67,6 +66,7 @@ cap = cv2.VideoCapture(VIDEO_PATH)
 with mp_pose.Pose(min_detection_confidence=0.8, min_tracking_confidence=0.5) as pose:
     # Loop through sequences aka videos
     for sequence in range(no_sequences):
+        frame_set = []
         # Loop through video length aka sequence length
         for frame_num in range(sequence_length):
 
