@@ -24,7 +24,7 @@ actions = ['squat-down', 'squat-up', 'pushup-down',
 
 config = {}
 
-config['seq_length'] = 30
+config['seq_length'] = 20
 config['data_dim'] = 88
 config['hidden_dim'] = 20
 config['output_dim'] = len(actions)  # 운동 종류

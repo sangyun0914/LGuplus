@@ -1,5 +1,6 @@
 from configs import *
 from model_v3 import Model
+import Draw
 
 data_dim = config['data_dim']
 output_dim = config['output_dim']

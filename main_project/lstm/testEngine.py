@@ -1,3 +1,4 @@
+from asyncio import exceptions
 from mimetypes import init
 from configs import *
 from model_v3 import Model
@@ -5,6 +6,8 @@ import extraFeatures
 import count
 from count import action_count_length
 from extract_v3 import getParts
+import Draw
+import StartEngine as s
 
 data_dim = config['data_dim']
 seq_length = config['seq_length']
@@ -14,7 +17,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 def initModel(model_name):
     model_path = os.path.join(
-        '/Users/jaejoon/LGuplus/main_project/lstm/model', model_name)
+        '/Users/jaejoon/LGuplus/main_project/lstm/model/modelv3', model_name)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = torch.load(model_path, map_location=device)
     print(model)
@@ -67,12 +70,12 @@ def getActionSequence(video, model):
 
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            mp_drawing.draw_landmarks(
-                image,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+            try:
+                Draw.DrawSkeleton(
+                    image, results.pose_landmarks.landmark, (203, 192, 255))
             # cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
+            except:
+                pass
 
             temp = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_world_landmarks.landmark]).flatten(
             ) if results.pose_world_landmarks else np.zeros(132)
@@ -100,31 +103,34 @@ def getActionSequence(video, model):
                     if res:
                         action_sequence.append(detected_action)
 
-                    cv2.putText(image, action, (50, 100),
-                                font, 2, (0, 0, 255), 3)
-                    cv2.putText(image, str(prob), (50, 300),
-                                font, 2, (0, 0, 255), 3)
-
-            cv2.putText(image, 'squat : {}, lunge : {}, pushup : {}'.format(count.cnt['squat'], count.cnt['lunge'], count.cnt['pushup']),
-                        (50, 400), font, 2, (0, 255, 0), 2)
+            #         cv2.putText(image, action, (50, 100),
+            #                     font, 2, (0, 0, 255), 3)
+            #         cv2.putText(image, str(prob), (50, 300),
+            #                     font, 2, (0, 0, 255), 3)
+            # cv2.putText(image, 'squat : {}, lunge : {}, pushup : {}'.format(count.cnt['squat'], count.cnt['lunge'], count.cnt['pushup']),
+            #             (50, 400), font, 2, (0, 255, 0), 2)
 
             # fps 계산
             terminate_t = timeit.default_timer()
             FPS = 1./(terminate_t - start_t)
             sum = FPS+sum
             if SFPS == "":
-                SFPS = str(FPS)
+                SFPS = str(int(FPS))
             if i == 10:
                 sum = sum/10
                 sum = round(sum, 4)
-                SFPS = str(sum)
+                SFPS = str(int(sum))
                 i = 0
                 sum = 0
             i += 1
-            cv2.putText(image, "FPS : "+SFPS, (800, 100),
-                        font, 2, (255, 0, 0), 3)
-            _fpss = np.append(_fpss, [float(SFPS)])
-
+            # cv2.putText(image, "FPS : "+SFPS, (800, 100),
+            #             font, 2, (255, 0, 0), 3)
+            # _fpss = np.append(_fpss, [float(SFPS)])
+            try:
+                Draw.DrawText(image, str(
+                    action), count.cnt['squat'], count.cnt['lunge'], count.cnt['pushup'], SFPS)
+            except:
+                pass
             cv2.imshow('Testing Engine', image)
             cv2.waitKey(1)
 
@@ -210,18 +216,21 @@ def test(model_name):
 def main():
 
     # 웹캠으로 테스트하고 싶을 때
-    '''model_name = 'model_mk10_20frame_8.8_250_0.0075_0.0003.pt'
+    model_name = 'model_mk10_20frame_8.8_300_0.0005_0.0001.pt'
     model = initModel(model_name)
-    getActionSequence(0, model)'''
+    cap = cv2.VideoCapture(0)
+    s.StartEngine(cap)
+    cap.release()
+    getActionSequence(0, model)
 
-    # 테스트할 모델 파일들이 있는 디렉토리
+    '''# 테스트할 모델 파일들이 있는 디렉토리
     models_path = '/Users/jaejoon/LGuplus/main_project/lstm/model/for_test'
     # 여러 모델에 대해서 테스트 수행
     for model_name in os.listdir(models_path):
         print('\n'+model_name)
         # 현재 테스트 중인 모델에 몇 프레임이 들어가고 있는지 표시
         print('sequence length :', seq_length, '\n')
-        test(model_name)
+        test(model_name)'''
 
 
 if __name__ == '__main__':
