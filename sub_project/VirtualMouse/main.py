@@ -60,6 +60,7 @@ def ChooseOption(image,point_x,point_y):
   cv2.rectangle(image, (opt4_start_x,opt4_start_y), (opt4_end_x,opt4_end_y), COLOR, THICKNESS)
   cv2.rectangle(image, (opt5_start_x,opt5_start_y), (opt5_end_x,opt5_end_y), COLOR, THICKNESS)
 
+  # Music | Record | Return | Feedback | challenge
   if (IsBetween(point_x,point_y,opt1_start_x,opt1_start_y,opt1_end_x,opt1_end_y)):
     cv2.rectangle(image, (opt1_start_x,opt1_start_y), (opt1_end_x,opt1_end_y), COLOR, cv2.FILLED)
 
@@ -75,6 +76,12 @@ def ChooseOption(image,point_x,point_y):
   elif (IsBetween(point_x,point_y,opt5_start_x,opt5_start_y,opt5_end_x,opt5_end_y)):
     cv2.rectangle(image, (opt5_start_x,opt5_start_y), (opt5_end_x,opt5_end_y), COLOR, cv2.FILLED)
   
+  GAP = 50
+  cv2.putText(image, "Music" , (opt1_start_x+GAP,opt1_start_y+GAP), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+  cv2.putText(image, "Record" , (opt2_start_x+GAP,opt2_start_y+GAP), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+  cv2.putText(image, "Return" , (opt3_start_x+GAP,opt3_start_y+GAP), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+  cv2.putText(image, "Feedback" , (opt4_start_x+GAP,opt4_start_y+GAP), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+  cv2.putText(image, "Challenge" , (opt5_start_x+GAP,opt5_start_y+GAP), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
   #속이 채워진 사각형
   # cv2.rectangle(image, (300,100), (400,300), COLOR, cv2.FILLED)
 with mp_hands.Hands(max_num_hands=1,model_complexity=0,min_detection_confidence=0.8,min_tracking_confidence=0.5) as hands:    
@@ -83,11 +90,11 @@ with mp_hands.Hands(max_num_hands=1,model_complexity=0,min_detection_confidence=
     
     if (ret == False):
       break
-    
+
     # Recolor Feed
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     image.flags.writeable = False        
-  
+    image = cv2.flip(image,1)
     # Make Detections
     results = hands.process(image)
 
@@ -98,13 +105,12 @@ with mp_hands.Hands(max_num_hands=1,model_complexity=0,min_detection_confidence=
     # try:
     try:
       if results.multi_hand_landmarks:
-        image, point_x, point_y = ExtractFinger(image,results,5,(0,255,0))
+        image, point_x, point_y = ExtractFinger(image,results,15,(0,255,0))
         ChooseOption(image,point_x,point_y)
 
     except:
       pass
     
-    image = cv2.flip(image,1)
     cv2.imshow('Virtual Mouse', image)
 
     if cv2.waitKey(10) & 0xFF == ord('q'):
