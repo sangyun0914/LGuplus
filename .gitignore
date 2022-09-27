@@ -18,8 +18,8 @@ sub_project/Posture/utils/Engine/alexnet-transfer.pt
 *.pickle
 *.pth
 *.pt
-#*.pyc
-*__pychache__
+*.pyc
+# *__pychache__
 study/04_study/sangyun/images
 study/04_study/sangyun/video
 main_project/lstm/videos/*
